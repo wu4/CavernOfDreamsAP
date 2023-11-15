@@ -11,7 +11,7 @@ class LocationData:
 if __name__ == "__main__":
     accum: list[str] = []
     location_datas: dict[str, list[LocationData]] = {}
-    with open("location_names.csv", "r") as csv_file:
+    with open("cavern_of_dreams_ap_logic/location_names.csv", "r") as csv_file:
         reader = csv.reader(csv_file)
         current_category: str | None = None
         for row in reader:
