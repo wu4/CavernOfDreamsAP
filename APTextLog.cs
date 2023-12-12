@@ -9,21 +9,20 @@ using UnityEngine.UI;
 
 namespace CoDArchipelago
 {
+    [HasInitMethod]
     class APTextLog
     {
-        static APTextLog instance;
+        public static APTextLog instance;
         static readonly int textLogViewCount = 15;
 
         bool isOpen = false;
 
-        CinemachineInputProvider cameraControl;
+        readonly CinemachineInputProvider cameraControl;
 
-        InputAction sendChatAction;
-        InputAction closeChatAction;
+        readonly InputAction sendChatAction;
+        readonly InputAction closeChatAction;
 
-        RectTransform chatViewportTransform;
-
-        InputActionReference storedCameraInputActionReference;
+        readonly InputActionReference storedCameraInputActionReference;
 
         // ScrollView scrollView;
         // TextMeshProUGUI textInterface;

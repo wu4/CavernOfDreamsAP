@@ -66,6 +66,7 @@ namespace CoDArchipelago
         public static void Patch()
         {
             harmony = new Harmony("cavernofdreams.mod.archipelago");
+            PrincessPatches.Patch(harmony);
             harmony.PatchAll();
         }
 

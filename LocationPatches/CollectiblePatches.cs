@@ -4,77 +4,27 @@ using HarmonyLib;
 using UnityEngine;
 using System.Collections.Generic;
 using System;
-using BepInEx.Logging;
-using UnityEngine.SceneManagement;
-using System.Linq;
-using Archipelago.MultiClient.Net.Packets;
-using System.Runtime.InteropServices;
-using System.IO;
-using System.Data.SqlTypes;
-using UnityEngine.Networking;
-using System.Threading.Tasks;
 
 namespace CoDArchipelago
 {
-    static class APCollectible
+    static class CollectiblePatches
     {
+        [HarmonyPatch(typeof(CollectibleItem), "Collect")]
+        static class CollectibleItemPatch {
+            static bool Prefix(CollectibleItem __instance, ref bool __runOriginal) {
+                if (!__runOriginal) return false;
 
-        public enum APCollectibleType {
-            Minor = 100,
-            Major = 101,
-            Event = 102
-        }
+                // TwoState ts = __instance.GetComponent<TwoStateExists>();
+                // GlobalHub.Instance.save.SetFlag("HAS_" + ts.flag, true);
 
-        [HarmonyPatch(typeof(Area), "Activate")]
-        static class Patch
-        {
-            static bool Prefix(Area __instance)
-            {
-
-                if (__instance.transform.Find("AlreadyPatched") != null) return true;
-
-                var cols = __instance.GetComponentsInChildren<Collectible>();
-
-                foreach (Collectible col in cols) {
-                    // col.type = Collectible.CollectibleType.KEY;
-                    TwoState ts = col.GetComponent<TwoState>();
-                    // paths.Add(ts.flag, col.type);
-                    ts.flag = "LOCATION_" + ts.flag;
-                }
-
-                GameObject g = new();
-                g.name = "AlreadyPatched";
-                g.transform.parent = __instance.transform;
-
-                return true;
+                return CollectPatch.Prefix(__instance, ref __runOriginal);
             }
         }
-
-        [HarmonyPatch(typeof(Save), "SetFlag")]
-        static class SetFlagPatch
-        {
-            static readonly Dictionary<string, string> localChecks = new(){
-                {"LOCATION_NOTE_CAVE2", "CAVE_NURIKABE_FALLEN"},
-            };
-
-            static void Postfix(Save __instance, string name, bool b)
-            {
-                if (!b) return;
-
-                if (name.StartsWith("LOCATION")) {
-                    if (localChecks.TryGetValue(name, out string extra_flag)) {
-                        if (!Events.TryCollect(extra_flag)) {
-                            __instance.SetFlag(extra_flag, true);
-                        }
-                    }
-                }
-            }
-        }
-
+            
         [HarmonyPatch(typeof(Collectible), "Collect", new Type[] {})]
-        public static class CollectiblePatch
+        public static class CollectPatch
         {
-            static readonly MethodInfo collectEffectsInfo = typeof(Collectible).GetMethod("CollectEffects", BindingFlags.NonPublic | BindingFlags.Instance);
+            static readonly MethodInfo collectEffectsInfo = AccessTools.Method(typeof(Collectible), "CollectEffects");
 
             static readonly AccessTools.FieldRef<GlobalHub, GameObject> cutsceneItemModelRef =
                 AccessTools.FieldRefAccess<GlobalHub, GameObject>("cutsceneItemModel");
@@ -82,15 +32,16 @@ namespace CoDArchipelago
             static readonly AccessTools.FieldRef<Player, Animator> animatorRef =
                 AccessTools.FieldRefAccess<Player, Animator>("animator");
 
-            public static void DoPlayGotItemCutscene(Collectible collectible)
+            static void DoPlayGotItemCutscene(Collectible collectible)
             {
                 GameObject model = collectible.model;
                 Cutscene itemCutscene = collectible.cutscene;
-                if (itemCutscene != null) {
+                if (itemCutscene == null) {
+                    throw new Exception("Fella cutscene is null");
+                } else {
+                    // force animation reset
                     animatorRef(GlobalHub.Instance.player).Play("Attack", -1, 0);
                     GlobalHub.Instance.SetCutscene(itemCutscene);
-                } else {
-                    Debug.LogWarning("Fella cutscene is null");
                 }
 
                 ref GameObject cutsceneItemModel = ref cutsceneItemModelRef(GlobalHub.Instance);
@@ -113,22 +64,27 @@ namespace CoDArchipelago
                 if (r != null) r.enabled = false;
             }
 
-            static readonly AccessTools.FieldRef<GlobalHub, World> worldRef =
-                AccessTools.FieldRefAccess<GlobalHub, World>("world");
-
-            static bool Prefix(Collectible __instance)
+            public static bool Prefix(Collectible __instance, ref bool __runOriginal)
             {
+                if (!__runOriginal) return false;
+
                 __instance.model?.transform.SetParent(null);
                 __instance.cutscene?.transform.SetParent(null);
                 __instance.GetComponent<TwoStateExists>().SetFlag();
                 collectEffectsInfo.Invoke(__instance, new object[] {});
-                UnityEngine.Object.Destroy(__instance.gameObject);
-                ref World world = ref worldRef(GlobalHub.Instance);
+                GameObject.Destroy(__instance.gameObject);
 
-                // UIController.Instance.SetModelVisible(__instance.type);
+                // LocationPatching.CollectJingle(__instance.type);
+                if (
+                    __instance.type == Collectible.CollectibleType.FELLA
+                    || __instance.type == Collectible.CollectibleType.ITEM
+                ) {
+                    DoPlayGotItemCutscene(__instance);
+                }
+                // ref World world = ref worldRef(GlobalHub.Instance);
+
                 // GlobalHub.Instance.save.AddCollectible(__instance.type, __instance.amount);
                 //// do stuff
-                // UIController.Instance.collectibleCounter.text = string.Concat((object) GlobalHub.Instance.save.GetCollectible(__instance.type));
                 return false;
             }
 
