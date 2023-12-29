@@ -3,91 +3,80 @@ using System.Linq;
 using System.Reflection.Emit;
 using HarmonyLib;
 using UnityEngine;
+using static CoDArchipelago.CodeMatchHelpers;
 
-namespace CoDArchipelago
+namespace CoDArchipelago.SkillPatches
 {
-    static partial class Skills
+    public static class Sprint
     {
-        [HarmonyPatch(typeof(Player), "UpdateInputs")]
-        static class SprintPatch
+        static readonly float maxSprintMomentum = 0.5f;
+
+        // NOTE: hardcoded value taken from Player.AboveMomentumFloor()
+        static readonly float minSprintMomentum = 0.10000000149011612f;
+
+        public static bool IsSprintInput(Player player)
         {
-            static readonly float maxSprintMomentum = 0.5f;
+            return FlagCache.CachedSkillFlags.sprint
+                && !FlagCache.CachedSkillFlags.roll
+                && player.IsGrounded()
+                && !player.IsSitting()
+                && PlayerAccess.Fields.isMoveInput.Get(player)
+                && player.IsRollHeld();
+        }
 
-            // taken from Player.AboveMomentumFloor()
-            static readonly float minSprintMomentum = 0.10000000149011612f;
+        static void UpdateSprint(Player player)
+        {
+            if (!IsSprintInput(player)) return;
 
-            static bool IsSprinting(Player player)
+            float momentum = PlayerAccess.Fields.momentum.Get(player);
+            if (momentum >= maxSprintMomentum) return;
+
+            PlayerAccess.Fields.momentum.Set(player, Mathf.Clamp(momentum + (Time.deltaTime * 0.3f), minSprintMomentum, maxSprintMomentum));
+        }
+        
+
+        [HarmonyPatch(typeof(Player), "UpdateInputs")]
+        static class Patch
+        {
+            static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
             {
-                return HasSkill("SPRINT")
-                    && !HasSkill("ROLL")
-                    && player.IsGrounded()
-                    && !(bool)PlayerMethods.IsSitting.Invoke(player, new object[] {})
-                    && (bool)PlayerFields.isMoveInput.GetValue(player)
-                    && (bool)PlayerMethods.IsRollHeld.Invoke(player, new object[] {});
-            }
+                var matcher = new CodeMatcher(instructions, generator);
 
-            static void UpdateSprint(Player player)
-            {
-                if (!IsSprinting(player)) return;
+                matcher.MatchForward(
+                    false,
+                    new(OpCodes.Ldarg_0),
+                    Calls<Player>("IsClimbing")
+                );
 
-                float momentum = (float)PlayerFields.momentum.GetValue(player);
-                if (momentum >= maxSprintMomentum) return;
+                matcher.Insert(
+                    new(OpCodes.Ldarg_0), CodeInstruction.Call(typeof(Sprint), nameof(UpdateSprint))
+                );
 
-                PlayerFields.momentum.SetValue(player, Mathf.Clamp(momentum + (Time.deltaTime * 0.3f), minSprintMomentum, maxSprintMomentum));
-            }
+                matcher.MatchForward(
+                    false,
+                    new(OpCodes.Ldarg_0),
+                    Calls<Player>("IsMucky")
+                );
 
-            // keep momentum at zero if no sprint
-            static void PatchMomentum(CodeInstructionParser parser)
-            {
-                int instructionIndex =
-                    parser.FirstInstanceCodeIndex(o =>
-                        parser[o.Index + 1].Calls(PlayerMethods.IsMucky)
-                    );
+                CodeInstruction leaveOp = matcher.Clone().MatchForward(
+                    false,
+                    new CodeMatch(OpCodes.Br)
+                ).Instruction;
 
-                Label goNextBlock = parser.generator.DefineLabel();
-                parser.AddLabel(instructionIndex, goNextBlock);
+                matcher.CreateLabel(out Label goNextBlock);
 
-                CodeInstruction leaveOp =
-                    parser.FirstCode(o =>
-                        o.Index > instructionIndex
-                        && o.Item.opcode == OpCodes.Br
-                    )
-                    .Item;
-
-                var checkSprintMovementCodes = new CodeInstruction[] {
+                matcher.Insert(
                     new(OpCodes.Ldarg_0),         CodeInstruction.Call(typeof(Player), "CarryingTorpedoWhileUnderwater"), new(OpCodes.Brtrue_S, goNextBlock),
-                    new(OpCodes.Ldstr, "SPRINT"), CodeInstruction.Call(typeof(Skills), nameof(HasSkill)), new(OpCodes.Brtrue_S, goNextBlock),
+                    // new(OpCodes.Ldsfld, sprintInfo), new(OpCodes.Brtrue_S, goNextBlock),
+                    CodeInstruction.LoadField(typeof(FlagCache.CachedSkillFlags), nameof(FlagCache.CachedSkillFlags.sprint)), new(OpCodes.Brtrue_S, goNextBlock),
+                    // new(OpCodes.Ldstr, "SPRINT"), CodeInstruction.Call(typeof(Skills), nameof(HasSkill)), new(OpCodes.Brtrue_S, goNextBlock),
 
                     new(OpCodes.Ldarg_0), new(OpCodes.Ldc_R4, 0f), CodeInstruction.StoreField(typeof(Player), "momentum"),
 
                     leaveOp
-                };
+                );
 
-                parser.codes.InsertRange(instructionIndex, checkSprintMovementCodes);
-            }
-
-            static void PatchInjectSprint(CodeInstructionParser parser)
-            {
-                var instructionIndex =
-                    parser.FirstInstanceCodeIndex(o =>
-                        parser[o.Index + 1].Calls(PlayerMethods.IsClimbing)
-                    );
-
-                var injectDoSprintCodes = new CodeInstruction[] {
-                    new(OpCodes.Ldarg_0), CodeInstruction.Call(typeof(SprintPatch), nameof(UpdateSprint))
-                };
-
-                parser.codes.InsertRange(instructionIndex, injectDoSprintCodes);
-            }
-
-            static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
-            {
-                var parser = new CodeInstructionParser(instructions, generator);
-
-                PatchMomentum(parser);
-                PatchInjectSprint(parser);
-
-                return parser.codes.AsEnumerable();
+                return matcher.InstructionEnumeration();
             }
         }
     }

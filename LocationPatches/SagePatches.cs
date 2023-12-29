@@ -3,12 +3,24 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
+using TMPro;
 using UnityEngine;
+using CoDArchipelago.GlobalGameScene;
 
 namespace CoDArchipelago
 {
     static class SagePatches
     {
+        class ChangeHasSkillPopup : InstantiateOnGameSceneLoad
+        {
+            public ChangeHasSkillPopup()
+            {
+                GameScene.FindInScene("Rendering", "Canvas/PauseMenu/PauseMenuPage1/SageReminder/ButtonText")
+                    .GetComponent<TextMeshProUGUI>()
+                    .SetText("NEW ITEM\nAVAILABLE!");
+            }
+        }
+
         static bool HasFlag(string flag_name) => GlobalHub.Instance.save.GetFlag(flag_name).on;
         static int EggCount() => GlobalHub.Instance.save.GetCollectible(Collectible.CollectibleType.FELLA);
         

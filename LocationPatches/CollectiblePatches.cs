@@ -91,7 +91,7 @@ namespace CoDArchipelago
         }
 
         static readonly Regex _card_regex = new("^(CARD)_([A-Z]+)_([A-Z_]+)$");
-        static readonly Regex _gratitude_regex = new("^GRATITUDE_([0-9]+)$");
+        static readonly Regex _gratitude_regex = new("^GRATITUDE([0-9]+)$");
         static readonly Regex _other_regex = new("^([A-Z]+)_([A-Z_]+)([0-9]+)$");
 
         [HarmonyPatch(typeof(Save), "DoesFlagMatchPattern")]

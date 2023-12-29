@@ -4,50 +4,123 @@ using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
 using UnityEngine;
+using CoDArchipelago.GlobalGameScene;
 
 namespace CoDArchipelago
 {
-    [HasInitMethod]
-    static class PrincessPatches
+    class PrincessPatches : InstantiateOnGameSceneLoad
     {
-        static void PatchMeltedIceFlags(CodeInstructionParser parser)
+        public PrincessPatches()
         {
-            foreach (var code in parser.byIndex) {
-                if (code.Item.opcode != OpCodes.Ldstr) continue;
-                if ((string)code.Item.operand != "PALACE_MELTED_ICE") continue;
-                code.Item.operand = "LOCATION_PALACE_MELTED_ICE";
-            }
+            PatchEggVisibility();
+            PatchPrincessTint();
+            
+            Collecting.Location.RegisterTrigger("LOCATION_PALACE_MELTED_ICE", UnfreezePrincess);
         }
-
-        static IEnumerable<CodeInstruction> PatchMeltedIceTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
+        
+        static void UnfreezePrincess()
         {
-            var parser = new CodeInstructionParser(instructions, generator);
+            Transform princess = GameScene.FindInScene("PALACE", "Valley (Main)/NPCs/Princess");
 
-            PatchMeltedIceFlags(parser);
+            princess.Find("princess2/Prison").gameObject.SetActive(false);
+            princess.Find("princess2/Body").GetComponent<TintChange>().Activate();
 
-            return parser.codes.AsEnumerable();
+            princess.GetComponent<Princess>().Whack(Whackable.WhackType.ATTACK, null);
         }
-
-        static MethodInfo[] patchTargets = new MethodInfo[] {
-            AccessTools.Method(typeof(Princess), nameof(Princess.SetDefaultAnimation)),
-            AccessTools.Method(typeof(Princess), nameof(Princess.Interact)),
-            AccessTools.Method(typeof(Princess), "HandleWhack"),
-        };
-
-        public static void Patch(Harmony harmony)
+        
+        /// <summary>
+        /// Update the tint component's flag
+        /// </summary>
+        static void PatchPrincessTint()
         {
-            var transpiler = new HarmonyMethod(AccessTools.Method(typeof(PrincessPatches), nameof(PatchMeltedIceTranspiler)));
-            foreach(MethodInfo method in patchTargets) {
-                harmony.Patch(method, transpiler: transpiler);
-            }
+            var area = GameScene.FindInScene("PALACE", "Valley (Main)");
+
+            var princessBody = area.Find("NPCs/Princess/princess2/Body");
+            princessBody.GetComponent<TintChange>().flag = "LOCATION_PALACE_MELTED_ICE";
         }
+        
 
-        public static void Init()
+        /// <summary>
+        /// Add the correct flags to the eggs such that they appear at the
+        /// correct time
+        /// </summary>
+        static void PatchEggVisibility()
         {
-            var root = GlobalGameScene.FindInScene("PALACE", "Valley (Main)/Cutscenes");
+            var area = GameScene.FindInScene("PALACE", "Valley (Main)");
+
+            var cutscenes = area.Find("Cutscenes");
             foreach (int i in Enumerable.Range(1, 3)) {
-                root.Find("PrincessGiveItem" + i + "/ItemToToss").GetComponent<TwoStateExists>().flag = "ITEM_PRINCESS_" + i + "_GIVEN";
+                cutscenes.Find("PrincessGiveItem" + i + "/ItemToToss").GetComponent<TwoStateExists>().flag = "ITEM_PRINCESS_" + i + "_GIVEN";
             }
+        }
+        
+        [HarmonyPatch(typeof(Princess), nameof(Princess.SetDefaultAnimation))]
+        static class SetDefaultAnimationPatch
+        {
+            static bool Prefix(Princess __instance)
+            {
+                var animator = __instance.GetComponentInChildren<Animator>();
+                animator.Play(FlagCache.CachedOtherFlags.locationPalaceMeltedIce ? "Idle" : "Frozen");
+
+                return false;
+            }
+        }
+        
+        [HarmonyPatch(typeof(Princess), "HandleWhack")]
+        static class HandleWhackPatch
+        {
+            static bool Prefix(Princess __instance, ref bool ___hit, ref bool __result)
+            {
+                if (___hit) {
+                    __result = false;
+                    return false;
+                }
+                var animator = __instance.GetComponentInChildren<Animator>();
+                animator.Play(FlagCache.CachedOtherFlags.locationPalaceMeltedIce ? "Hit" : "FrozenHit");
+                __result = true;
+                return false;
+            }
+        }
+        
+        [HarmonyPatch(typeof(Princess), nameof(Princess.Interact))]
+        static class InteractPatch
+        {
+            static bool Prefix(Princess __instance)
+            {
+                Save save = GlobalHub.Instance.save;
+                if (FlagCache.CachedOtherFlags.locationPalaceMeltedIce) {
+                    GlobalHub.Instance.SetCutscene(__instance.speakThawed);
+                    return false;
+                }
+
+                bool gaveItem = false;
+                foreach (int i in Enumerable.Range(1, 3)) {
+                    if (save.GetFlag("ITEM_PRINCESS_" + i).On()) {
+                        save.SetFlag("ITEM_PRINCESS_" + i, false);
+                        save.SetFlag("ITEM_PRINCESS_" + i + "_GIVEN", true);
+                        GameScene.FindInScene("PALACE", "Valley (Main)/Cutscenes/PrincessGiveItem" + i + "/ItemToToss").gameObject.SetActive(true);
+                        gaveItem = true;
+                    }
+                }
+                if (gaveItem) {
+                    StockSFX.Instance.whistleUp.Play();
+                    StockSFX.Instance.jingleGoodShort.Play();
+                    if (Enumerable.Range(1, 3).All(i => save.GetFlag("ITEM_PRINCESS_" + i + "_GIVEN").On())) {
+                        save.SetFlag("LOCATION_PALACE_MELTED_ICE", true);
+                    }
+                    return false;
+                }
+                
+                if (Enumerable.Range(1, 3).Any(i => save.GetFlag("ITEM_PRINCESS_" + i + "_GIVEN").On())) {
+                    GlobalHub.Instance.SetCutscene(__instance.speakFrozenIncomplete);
+                    return false;
+                }
+                
+                GlobalHub.Instance.SetCutscene(__instance.speakFrozenRepeat);
+                
+                return false;
+            }
+        
         }
     }
 }

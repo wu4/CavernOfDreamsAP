@@ -6,15 +6,41 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine.UI;
+using CoDArchipelago.GlobalGameScene;
 
 namespace CoDArchipelago
 {
-    [HasInitMethod]
-    class APTextLog
+    class APTextLog : InstantiateOnGameSceneLoad
     {
-        public static APTextLog instance;
+        public static APTextLogInstance Instance;
+
+        [LoadOrder(-100)]
+        public APTextLog()
+        {
+            Instance = new APTextLogInstance();
+        }
+
+        [HarmonyPatch(typeof(GlobalHub), "Update")]
+        static class ChatInputPatch
+        {
+            static void Postfix()
+            {
+                Instance.Update();
+
+                bool show_cursor = GlobalHub.Instance.IsPaused() || Instance.IsOpen;
+                Cursor.lockState = show_cursor ? CursorLockMode.None : CursorLockMode.Locked;
+                Cursor.visible = show_cursor;
+            }
+        }
+    }
+
+    class APTextLogInstance
+    {
         static readonly int textLogViewCount = 15;
 
+        public bool IsOpen {
+            get => isOpen;
+        }
         bool isOpen = false;
 
         readonly CinemachineInputProvider cameraControl;
@@ -33,11 +59,6 @@ namespace CoDArchipelago
         readonly List<System.DateTime> textLogTimes = new();
         readonly GameObject[] textLogObjects = new GameObject[textLogViewCount];
         readonly List<string> textLog = new();
-        
-        public static void Init()
-        {
-            instance = new APTextLog();
-        }
 
         public void AddLine(string text)
         {
@@ -90,7 +111,7 @@ namespace CoDArchipelago
             cameraControl.XYAxis = storedCameraInputActionReference;
         }
 
-        private void Update()
+        public void Update()
         {
             if (sendChatAction.WasPressedThisFrame()) {
                 SendButtonPressed();
@@ -115,7 +136,7 @@ namespace CoDArchipelago
             }
         }
 
-        private APTextLog()
+        public APTextLogInstance()
         {
             sendChatAction = new(binding: "<Keyboard>/enter");
             sendChatAction.Enable();
@@ -127,10 +148,10 @@ namespace CoDArchipelago
             };
             ac.Enable();
 
-            cameraControl = GlobalGameScene.FindInScene("Cameras", "CM Standard").GetComponent<CinemachineInputProvider>();
+            cameraControl = GameScene.FindInScene("Cameras", "CM Standard").GetComponent<CinemachineInputProvider>();
             storedCameraInputActionReference = cameraControl.XYAxis;
 
-            Transform parent = GlobalGameScene.FindInScene("Rendering", "Canvas");
+            Transform parent = GameScene.FindInScene("Rendering", "Canvas");
 
             GameObject container = new("AP Log");
             container.transform.parent = parent;
@@ -217,19 +238,6 @@ namespace CoDArchipelago
 
             foreach (int a in Enumerable.Range(1, 5)) {
                 AddLine("test " + a.ToString());
-            }
-        }
-
-        [HarmonyPatch(typeof(GlobalHub), "Update")]
-        static class ChatInputPatch
-        {
-            static void Postfix()
-            {
-                instance.Update();
-
-                bool show_cursor = GlobalHub.Instance.IsPaused() || instance.isOpen;
-                Cursor.lockState = show_cursor ? CursorLockMode.None : CursorLockMode.Locked;
-                Cursor.visible = show_cursor;
             }
         }
     }

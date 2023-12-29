@@ -66,7 +66,7 @@ namespace CoDArchipelago
         public static void Patch()
         {
             harmony = new Harmony("cavernofdreams.mod.archipelago");
-            PrincessPatches.Patch(harmony);
+            // PrincessPatches.Patch(harmony);
             harmony.PatchAll();
         }
 
@@ -76,6 +76,7 @@ namespace CoDArchipelago
         }
     }
 
+    /*
     static class DialoguePatches
     {
         private static readonly Dictionary<string, string[]> replace_dialogue = new Dictionary<string, string[]>(){
@@ -109,5 +110,6 @@ namespace CoDArchipelago
             }
         }
     }
+    */
 }
 

@@ -8,6 +8,15 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
+  
+  <Target Name="GenerateData"
+          BeforeTargets="CoreCompile"
+          DependsOnTargets="PrepareForBuild"
+          Inputs="$(MSBuildProjectDirectory)\prebuild.py;$(MSBuildProjectDirectory)\cavern_of_dreams_ap_logic\location_names.csv"
+          Outputs="$(MSBuildProjectDirectory)\Generated.cs"
+  >
+    <Exec Command="python $(MSBuildProjectDirectory)\prebuild.py" />
+  </Target>
 
   <ItemGroup>
     <PackageReference Include="Archipelago.MultiClient.Net" Version="5.0.6" />

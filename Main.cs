@@ -1,128 +1,130 @@
 using HarmonyLib;
 using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
+using System.Reflection.Emit;
 using System.Runtime.InteropServices;
-using TMPro;
+using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.TextCore;
-using UnityEngine.UI;
+using UnityEngine.Bindings;
+using static CoDArchipelago.CodeMatchHelpers;
 
 namespace CoDArchipelago
 {
-    class HasInitMethod : Attribute
+    class InstantiateOnGameSceneLoad {}
+
+    [AttributeUsage(AttributeTargets.Constructor)]
+    class LoadOrder : Attribute
     {
-        public readonly System.Type[] dependencies;
-        
-        public HasInitMethod(params System.Type[] dependencies)
+        public readonly int loadOrder;
+        public LoadOrder(int loadOrder) => this.loadOrder = loadOrder;
+    }
+
+    static class GameSceneLoadMethods
+    {
+        static readonly List<List<(string ClassName, ConstructorInfo Constructor)>> groupedConstructors =
+            Assembly.GetExecutingAssembly()
+                .GetTypes()
+                .Where(type => type.IsSubclassOf(typeof(InstantiateOnGameSceneLoad)))
+                .Select(type => (type.ToString(), type.GetConstructor(new Type[] {})))
+                .GroupBy(item => item.Item2.GetCustomAttribute<LoadOrder>()?.loadOrder ?? 0)
+                .ToDictionary(
+                    group => group.Key,
+                    group => group.ToList()
+                )
+                .OrderBy(item => item.Key)
+                .Select(item => item.Value)
+                .ToList();
+
+        public static void Invoke()
         {
-            this.dependencies = dependencies;
+            // Dictionary<string, double> timings = new();
+            foreach (var constructorGroup in groupedConstructors) {
+                foreach (var (ClassName, Constructor) in constructorGroup) {
+                    try {
+                        Debug.Log("Firing constructor for " + ClassName);
+                        Constructor.Invoke(new object[] {});
+                    } catch (Exception e) {
+                        Debug.LogError("Error during constructor for " + ClassName + ":");
+                        throw e;
+                    }
+                }
+                /*
+                Parallel.ForEach(
+                    constructorGroup,
+                    c => {
+                        var (ClassName, Constructor) = c;
+                        try {
+                            Debug.Log("Firing constructor for " + ClassName);
+                            // var start = DateTime.Now;
+                            Constructor.Invoke(new object[] {});
+                            // timings.Add(ClassName, (DateTime.Now - start).TotalSeconds);
+                        } catch (Exception e) {
+                            Debug.LogError("Error during constructor for " + ClassName + ":");
+                            throw e;
+                        }
+                    }
+                );
+                */
+            }
+            /*
+            foreach ((var name, var val) in timings.OrderByDescending(i => i.Value)) {
+                Debug.Log(name + ": " + val + "s");
+            }
+            */
         }
     }
     
-    static class ArchipelagoContext
+    static class InitPatches
     {
-        static void wew()
+        [HarmonyPatch(typeof(GlobalHub), "Awake")]
+        static class InitPatch
         {
-            var patchers = Assembly.GetExecutingAssembly()
-                .GetTypes()
-                .Select(type => new {Type = type, RuntimePatch = type.GetCustomAttribute<HasInitMethod>()})
-                .Where(a => a.RuntimePatch != null)
-                .ToList();
-
-            var a = new TopologicalSorter(patchers.Count);
-            
-            Dictionary<string, int> indexes = new();
-            
-            for (int i = 0; i < patchers.Count; i++) {
-                indexes[patchers[i].GetType().Name] = a.AddVertex(i);
-            }
-            for (int i = 0; i < patchers.Count; i++) {
-                foreach (var t in patchers[i].RuntimePatch.dependencies) {
-                    a.AddEdge(i, indexes[t.Name]);
-                }
-            }
-            
-            var r = a.Sort();
-            foreach (int i in r) {
-                AccessTools.Method(patchers[i].Type, "RuntimePatch").Invoke(null, new object[] {});
-            }
-        }
-
-        static readonly MethodInfo warpHelperInfo = typeof(GlobalHub).GetMethod("WarpHelper", BindingFlags.NonPublic | BindingFlags.Instance);
-        static void WarpTo(Area area, GameObject warpTargetObj)
-        {
-            warpHelperInfo.Invoke(GlobalHub.Instance, new object[]{area, warpTargetObj.transform});
-        }
-
-        static class InitPatches
-        {
-            static bool initFinished = false;
-
-            // block Areas from activating before init is finished
-            // this makes for a smaller patch in total than fully overriding GlobalHub.Awake
-            [HarmonyPatch(typeof(Area), "Activate")]
-            static class AreaInitPatch
+            static void Init()
             {
-                [HarmonyPriority(Priority.VeryHigh)]
-                static bool Prefix() => initFinished;
+                SaveHandler.LoadFile(GlobalHub.Instance.save, GlobalHub.numSaveFile);
+                GlobalHub.Instance.save.Initialize();
+
+                GameSceneLoadMethods.Invoke();
+
+                ChangeStartLocation.SetStartLocation("Cavern of Dreams - Sage");
             }
 
-            [HarmonyPatch(typeof(GlobalHub), "Start")]
-            static class StartPatch
+            static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
             {
-                static void Postfix()
-                {
-                    GlobalHub.Instance.cameraScript.Reset();
-                }
-            }
-            
-            [HarmonyPatch(typeof(GlobalHub), "Awake")]
-            static class InitPatch
-            {
-                // Area areaStartNormal
-                // GameObject positionStartNormal
-                // GameObject positionStart
-                static bool Prefix() {
-                    initFinished = false;
-                    return true;
-                }
+                var matcher = new CodeMatcher(instructions, generator);
+                
+                matcher.MatchForward(
+                    false,
+                    Calls<UnityEngine.Object, Area>("FindObjectOfType"),
+                    new(OpCodes.Stloc_0)
+                );
+                matcher.ThrowIfInvalid("Start of removal range");
+                
+                int startPos = matcher.Pos;
+                
+                var matcherClone = matcher.Clone();
+                int endPos = matcherClone.MatchForward(
+                    false,
+                    new(OpCodes.Ldarg_0),
+                    new(OpCodes.Ldc_R4, 60f),
+                    new(OpCodes.Newobj),
+                    new(OpCodes.Stfld)
+                ).Pos;
+                matcherClone.ThrowIfInvalid("End of removal range");
 
-                static void Postfix(GlobalHub __instance, ref Area ___areaCurrent, ref Area ___areaStartNormal, ref GameObject ___positionStart, ref Transform ___lastDest, ref World ___world)
-                {
-                    GlobalGameScene.Init();
-                    wew();
-                    // APResources.Init();
-                    // SkillMenuPatches.Init();
-                    // MapPatches.Init();
-                    // QualityOfLife.Init();
-                    // Cutscenes.Init();
-                    // APTextLog.Init();
-                    // PrincessPatches.RuntimePatchPrincess();
-                    // var warpComponent = WarpToStart.PatchScene();
-
-                    initFinished = true;
-
-                    ___areaStartNormal.gameObject.SetActive(false);
-
-                    // var a = CreateNewStart("CAVE", "Palace Lobby", "DestFromDepthsToPalaceLobby");
-                    // var a = CreateNewStart("PALACE", "Valley (Main)", "DestFromPalaceLobbyToValley");
-                    var a = new WarpToStart.StartLocation("PALACE", "Valley (Main)", "DestFromLakeToValley");
-                    // var a = CreateNewStart("CAVE", "Sun Cavern (Main)", "DestFromMonsterLobbyToCave");
-
-                    ___areaCurrent = a.area;
-                    ___positionStart = a.startLocation;
-                    ___lastDest = a.startLocation.transform;
-                    ___world = a.area.GetComponentInParent<World>();
-
-                    a.area.gameObject.SetActive(true);
-                    a.area.Activate();
-
-                    WarpToStart.SetStartLocation(a);
-                }
+                matcher.RemoveInstructions(
+                    endPos - startPos
+                );
+                
+                matcher.Advance(1);
+                matcher.Insert(
+                    CodeInstruction.Call(typeof(InitPatch), nameof(InitPatch.Init))
+                );
+                
+                return matcher.InstructionEnumeration();
             }
         }
     }
