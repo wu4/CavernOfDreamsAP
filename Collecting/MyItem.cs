@@ -49,7 +49,7 @@ namespace CoDArchipelago.Collecting
             // CollectJingle(type);
 
             if (randomized) {
-                APTextLog.Instance.AddLine("containing " + Data.allItems[flag]);
+                Messaging.TextLogManager.AddLine("containing " + Data.allItems[flag]);
             }
 
             if (itemTriggers.TryGetValue(flag, out Action<bool> itemTrigger)) {

@@ -112,7 +112,7 @@ namespace CoDArchipelago.Collecting
                 }
 
                 if (checks.TryGetValue(name, out Item item)) {
-                    APTextLog.Instance.AddLine("Collected <color=purple>" + Data.allLocations[name] + "</color>");
+                    Messaging.TextLogManager.AddLine("Collected <color=purple>" + Data.allLocations[name] + "</color>");
                 } else {
                     item = new MyItem(name.Substring(9), false);
                 }
