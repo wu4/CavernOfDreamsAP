@@ -14,6 +14,18 @@ namespace CoDArchipelago
             public T Invoke(O obj, params dynamic[] args) => (T)method.Invoke(obj, args);
         }
 
+        public class Action<O> {
+            readonly MethodInfo method;
+            public Action(string name)
+            {
+                method = AccessTools.Method(typeof(O), name);
+            }
+            
+            public void Invoke(O obj, params dynamic[] args) {
+                method.Invoke(obj, args);
+            }
+        }
+
         public class Field<O, T> {
             readonly FieldInfo field;
             public Field(string name)

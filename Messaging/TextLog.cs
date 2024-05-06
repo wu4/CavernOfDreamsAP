@@ -7,82 +7,70 @@ using TMPro;
 using UnityEngine.UI;
 using CoDArchipelago.GlobalGameScene;
 using UnityEngine.UIElements;
+using System;
 
 namespace CoDArchipelago.Messaging
 {
     partial class TextLog
     {
+        static TextLog Instance;
+
         public readonly GameObject gameObject;
-        static readonly int textLogViewCount = 25;
+        readonly GameObject textContainer;
 
         readonly ScrollRect scrollRect;
+        
+        class TextLogEntry
+        {
+            public readonly DateTime time;
+            public readonly GameObject gameObject;
+            public readonly TextMeshProUGUI tmp;
+            
+            public TextLogEntry(string text)
+            {
+                time = DateTime.Now;
+                gameObject = CreateLine(text, TextLog.Instance.textContainer.transform);
+                tmp = gameObject.GetComponent<TextMeshProUGUI>();
+            }
+        }
+        
+        readonly List<TextLogEntry> textLogEntries = new();
 
-        bool atBottom = true;
-        int scrollPos = 0;
+        static GameObject CreateLine(string text, Transform parent)
+        {
+            GameObject obj = new("Line");
+            obj.transform.SetParent(parent, false);
 
-        readonly List<System.DateTime> textLogTimes = new();
-        readonly GameObject[] textLogObjects = new GameObject[textLogViewCount];
-        readonly List<string> textLog = new();
+            var tmp = obj.AddComponent<TextMeshProUGUI>();
+            tmp.alignment = TextAlignmentOptions.BottomLeft;
+            tmp.fontSizeMin = 14;
+            tmp.fontSize = 14;
+            tmp.autoSizeTextContainer = true;
+            tmp.SetText(text);
+
+            return obj;
+        }
 
         public void AddLine(string text)
         {
-            textLogTimes.Add(System.DateTime.Now);
-            textLog.Add(text);
-            scrollPos += 1;
-            RefreshText();
-            /*
-            if (atBottom) {
-                ScrollDown();
-                // scrollPos += 1;
-                // RefreshText();
-            }
-            */
-        }
-
-        void RefreshText()
-        {
-            foreach (int i in Enumerable.Range(1, textLogViewCount)) {
-                var textComponent = textLogObjects[textLogViewCount-i].GetComponent<TextMeshProUGUI>();
-                textComponent.text = textLog.ElementAtOrDefault(scrollPos - i);
-            }
-        }
-
-        void ScrollDown()
-        {
-            scrollPos += 1;
-            string lastText = textLog.ElementAtOrDefault(scrollPos - 1);
-            foreach (GameObject textLogObject in textLogObjects.Reverse()) {
-                var textComponent = textLogObject.GetComponent<TextMeshProUGUI>();
-                (textComponent.text, lastText) = (lastText, textComponent.text);
-            }
-        }
-
-        void ScrollUp()
-        {
-            scrollPos -= 1;
-            string firstText = textLog.ElementAtOrDefault(scrollPos - textLogViewCount);
-            foreach (GameObject textLogObject in textLogObjects) {
-                var textComponent = textLogObject.GetComponent<TextMeshProUGUI>();
-                (textComponent.text, firstText) = (firstText, textComponent.text);
-            }
+            textLogEntries.Add(new(text));
         }
         
         public void Update(bool isOpen)
         {
             var now = System.DateTime.Now;
 
-            foreach (int i in Enumerable.Range(1, textLogViewCount)) {
-                var textComponent = textLogObjects[textLogViewCount-i].GetComponent<TextMeshProUGUI>();
+            foreach (var entry in textLogEntries) {
                 if (isOpen) {
-                    textComponent.alpha = 1;
+                    entry.tmp.alpha = 1;
                 } else {
-                    var timespan = now - textLogTimes.ElementAtOrDefault(scrollPos - i);
+                    var timespan = now - entry.time;
                     if (timespan.TotalSeconds > 5) {
-                        textComponent.alpha = 0;
+                        entry.tmp.alpha = 0;
                     } else if (timespan.TotalSeconds < 4) {
-                        textComponent.alpha = 1;
+                        entry.tmp.alpha = 1;
                     } else {
-                        textComponent.alpha = 1f - ((float)(timespan.TotalMilliseconds - 4000) / 1000f);
+                        entry.tmp.alpha = 1f - ((float)(timespan.TotalMilliseconds - 4000) / 1000f);
                     }
                 }
             }
@@ -90,6 +78,8 @@ namespace CoDArchipelago.Messaging
 
         public TextLog()
         {
+            Instance = this;
+
             Transform parent = GameScene.FindInScene("Rendering", "Canvas");
 
             gameObject = new("AP Log");
@@ -103,14 +93,19 @@ namespace CoDArchipelago.Messaging
 
             GameObject viewport = new("Viewport");
             viewport.transform.SetParent(gameObject.transform, false);
-            scrollRect = viewport.AddComponent<ScrollRect>();
+            // viewport.AddComponent<RectMask2D>();
+            
+            RectTransform viewport_rt = viewport.AddComponent<RectTransform>();
+            viewport_rt.pivot = new(0, 0);
+            viewport_rt.anchorMax = new(1, 1);
+            viewport_rt.anchorMin = new(0, 0);
 
             GameObject content = new("Content");
             content.transform.SetParent(viewport.transform, false);
 
             content.transform.localPosition = new(0, 0);
 
-            GameObject textContainer = new("Text");
+            textContainer = new("Text");
             textContainer.transform.SetParent(content.transform, false);
 
             var t_tr = textContainer.AddComponent<RectTransform>();
@@ -120,23 +115,14 @@ namespace CoDArchipelago.Messaging
             t_tr.pivot = new(0, 0);
             t_tr.sizeDelta = new(200, 500);
 
+            scrollRect = viewport.AddComponent<ScrollRect>();
+            scrollRect.viewport = viewport_rt;
+            scrollRect.content = t_tr;
+
             var vlg = textContainer.AddComponent<VerticalLayoutGroup>();
             vlg.childForceExpandHeight = false;
             vlg.childForceExpandWidth = false;
             vlg.childAlignment = TextAnchor.LowerLeft;
-
-            foreach (int i in Enumerable.Range(1, textLogViewCount)) {
-                GameObject obj = new("Line " + i.ToString());
-                obj.transform.SetParent(textContainer.transform, false);
-
-                var text = obj.AddComponent<TextMeshProUGUI>();
-                text.alignment = TextAlignmentOptions.BottomLeft;
-                text.fontSizeMin = 14;
-                text.fontSize = 14;
-                text.autoSizeTextContainer = true;
-
-                textLogObjects[i-1] = obj;
-            }
         }
     }
 }

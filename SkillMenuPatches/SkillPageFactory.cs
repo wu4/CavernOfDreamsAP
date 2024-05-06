@@ -47,6 +47,16 @@ namespace CoDArchipelago
                     (pos.x < -40f && pos.z < -29.3f);
             })},
         };
+        
+        static readonly Dictionary<string, (string, string)> carryables = new() {
+            {"Apple", ("LAKE", "Lake (Main)/Objects/Fruit Tree/Replacer")},
+            {"Medicine", ("MONSTER", "Monster/Rotate (Inside Monster)/Objects (Meeting)/Monster Throwable Replacer Variant")},
+            {"Bubble Conch", ("PALACE", "Sanctum/Objects/Torpedo Replacer")},
+            {"Sage's Gloves", ("GALLERY", "Water Lobby/Objects Center/ReplacerPaintingItemSage")},
+            {"Lady Opal's Head", ("GALLERY", "Water Lobby/Objects Storage/ReplacerPaintingItemPrincess")},
+            {"Shelnert's Fish", ("GALLERY", "Fire Lobby/Objects/ReplacerPaintingItemKappa")},
+            {"Mr. Kerrington's Wings", ("GALLERY", "Earth Lobby/Objects (Castle)/PaintingItemMonsterReplacer")},
+        };
 
         readonly GameObject skillPageBase;
         readonly MenuFlagFactory menuFlagFactory;
@@ -132,15 +142,38 @@ namespace CoDArchipelago
         static readonly int STEP_X = 150;
         static readonly int STEP_Y = 20;
 
-        public CursorPage Create(Transform parent = null)
+        public CursorPage Create(Transform parent = null, bool isDebug = false)
         {
-
             GameObject newSkillPage = GameObject.Instantiate(skillPageBase.gameObject, parent, false);
-
-            for (int i = 0; i < skillFlags.Count; i++) {
+            int i = 0; // used after the loop as well
+            while (i < skillFlags.Count) {
                 (string flagName, var data) = skillFlags.ElementAt(COL_HEIGHTS.Take(i % ROW_WIDTH).Sum() + (i / ROW_WIDTH));
                 GameObject flagObj = menuFlagFactory.Create(flagName, data.prettyName, newSkillPage.transform);
                 flagObj.transform.localPosition = new Vector3(){x = START_X + (STEP_X * (i % ROW_WIDTH)), y = START_Y - STEP_Y * Mathf.Floor(i / ROW_WIDTH), z = 0};
+
+                i++;
+            }
+
+            if (!isDebug) return newSkillPage.GetComponent<CursorPage>();
+
+            GameObject jbFlagObj = menuFlagFactory.Create("", "Jester Boots", newSkillPage.transform);
+            MO_JESTERBOOTS.Replace(jbFlagObj.GetComponent<MO_FLAG>());
+            jbFlagObj.transform.localPosition = new Vector3(){x = START_X + (STEP_X * (i % ROW_WIDTH)), y = START_Y - STEP_Y * Mathf.Floor(i / ROW_WIDTH), z = 0};
+            i++;
+
+            foreach ((string name, (string root, string path)) in carryables) {
+                var f = GlobalGameScene.GameScene.FindInScene(root, path);
+                Debug.Log(f);
+                var e = f.GetComponent<ReplaceEmitter>();
+                Debug.Log(e);
+                GameObject copy = GameObject.Instantiate(e.prefab);
+                copy.SetActive(false);
+                GameObject flagObj = menuFlagFactory.Create("", name, newSkillPage.transform);
+                MO_CARRYABLE flag = MO_CARRYABLE.Replace(flagObj.GetComponent<MO_FLAG>());
+                flag.carryable = copy.GetComponent<Carryable>();
+                flagObj.transform.localPosition = new Vector3(){x = START_X + (STEP_X * (i % ROW_WIDTH)), y = START_Y - STEP_Y * Mathf.Floor(i / ROW_WIDTH), z = 0};
+
+                i++;
             }
 
             return newSkillPage.GetComponent<CursorPage>();

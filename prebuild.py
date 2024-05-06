@@ -19,7 +19,7 @@ def serialize(item: FlagListIteration) -> list[str]:
 
 if __name__ == "__main__":
     accum: list[str] = []
-    location_datas = read_locations_csv("cavern_of_dreams_ap_logic/location_names.csv")
+    location_datas = read_locations_csv("../cavern_of_dreams_ap_logic/location_names.csv")
 
     accum.append("// Generated using prebuild.py")
 

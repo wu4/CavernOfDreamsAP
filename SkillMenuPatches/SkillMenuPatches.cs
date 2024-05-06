@@ -37,7 +37,7 @@ namespace CoDArchipelago
         {
             int index = skillPageBase.transform.GetSiblingIndex();
             
-            CursorPage newDebugSkillPage = skillPageFactory.Create(skillPageBase.transform.parent);
+            CursorPage newDebugSkillPage = skillPageFactory.Create(skillPageBase.transform.parent, isDebug: true);
             newDebugSkillPage.transform.SetSiblingIndex(index);
 
             GameObject.DestroyImmediate(skillPageBase);
