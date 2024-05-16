@@ -12,10 +12,10 @@
   <Target Name="GenerateData"
           BeforeTargets="CoreCompile"
           DependsOnTargets="PrepareForBuild"
-          Inputs="$(MSBuildProjectDirectory)\prebuild.py;$(MSBuildProjectDirectory)\cavern_of_dreams_ap_logic\location_names.csv"
-          Outputs="$(MSBuildProjectDirectory)\Generated.cs"
+          Inputs="$(MSBuildProjectDirectory)/prebuild.py;$(MSBuildProjectDirectory)/cavern_of_dreams_ap_logic/location_names.csv"
+          Outputs="$(MSBuildProjectDirectory)/Generated.cs"
   >
-    <Exec Command="python $(MSBuildProjectDirectory)\prebuild.py" />
+    <Exec Command="python $(MSBuildProjectDirectory)/prebuild.py" />
   </Target>
 
   <ItemGroup>

@@ -10,7 +10,7 @@ namespace CoDArchipelago
             {
                 method = AccessTools.Method(typeof(O), name);
             }
-            
+
             public T Invoke(O obj, params dynamic[] args) => (T)method.Invoke(obj, args);
         }
 
@@ -20,7 +20,7 @@ namespace CoDArchipelago
             {
                 method = AccessTools.Method(typeof(O), name);
             }
-            
+
             public void Invoke(O obj, params dynamic[] args) {
                 method.Invoke(obj, args);
             }
@@ -32,7 +32,7 @@ namespace CoDArchipelago
             {
                 field = AccessTools.Field(typeof(O), name);
             }
-            
+
             public T Get(O obj) => (T)field.GetValue(obj);
 
             public void Set(O obj, T value) => field.SetValue(obj, value);

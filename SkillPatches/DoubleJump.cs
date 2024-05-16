@@ -1,10 +1,7 @@
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection.Emit;
 using HarmonyLib;
 using UnityEngine;
-using UnityEngine.Localization.SmartFormat.Utilities;
 using static CoDArchipelago.CodeMatchHelpers;
 
 namespace CoDArchipelago.SkillPatches
@@ -231,7 +228,7 @@ namespace CoDArchipelago.SkillPatches
                     new(OpCodes.Ldarg_0),
                     Calls<Player>("IsJumpPressed")
                 );
-                
+
                 matcher.MatchForward(
                     true,
                     new(OpCodes.Ldarg_0),
@@ -249,9 +246,9 @@ namespace CoDArchipelago.SkillPatches
                     }
                     code = matcher.Instruction;
                 }
-                
+
                 matcher.CreateLabel(out Label onFalse);
-                
+
                 Label onTrue =
                     (Label)matcher.Clone().MatchForward(
                         false,

@@ -1,4 +1,3 @@
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +9,7 @@ namespace CoDArchipelago.Collecting
         static readonly Dictionary<string, Action<bool>> itemTriggers = new();
         public static void RegisterTrigger(string itemFlag, Action<bool> action) =>
             itemTriggers.Add(itemFlag, action);
-        
+
         class ResetTriggersOnLoad : InstantiateOnGameSceneLoad
         {
             [LoadOrder(int.MinValue)]

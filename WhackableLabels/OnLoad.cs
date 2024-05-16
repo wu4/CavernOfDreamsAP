@@ -17,7 +17,7 @@ namespace CoDArchipelago.WhackableLabels
         public static Material tmpFontMaterial;
 
         static readonly Dictionary<string, Dictionary<string, List<WhackableLabel>>> allWhackableTexts = new();
-        
+
         GameObject CreateBottomLeftAnchoredContainer(string name, Transform parent)
         {
             GameObject ret = new(name);
@@ -26,7 +26,7 @@ namespace CoDArchipelago.WhackableLabels
             rt.anchorMax = new(1.0f, 1.0f);
             rt.anchorMin = new(0.0f, 0.0f);
             rt.pivot = new(0.0f, 0.0f);
-            
+
             return ret;
         }
 
@@ -41,7 +41,7 @@ namespace CoDArchipelago.WhackableLabels
             currentWhackableTexts = null;
 
             canvasRectTransform = GameScene.FindInScene("Rendering", "Canvas") as RectTransform;
-            
+
             GameObject labelsHiderContainer = CreateBottomLeftAnchoredContainer("WhackableLabelsContainer", canvasRectTransform);
             HideWhenSitting hider = labelsHiderContainer.AddComponent<HideWhenSitting>();
             labelsContainer = CreateBottomLeftAnchoredContainer("WhackableLabels", labelsHiderContainer.transform);
@@ -63,9 +63,9 @@ namespace CoDArchipelago.WhackableLabels
                     allWhackableTexts.GetOrAdd(regionName).GetOrAdd(areaName).Add(whackableLabel);
                 });
         }
-        
+
         static List<WhackableLabel> currentWhackableTexts;
-        
+
         [HarmonyPatch(typeof(Area), nameof(Area.Activate))]
         static class OnAreaLoad {
             static void Postfix(Area __instance)

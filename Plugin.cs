@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using BepInEx;
 using HarmonyLib;
-using UnityEngine;
 using Archipelago.MultiClient.Net;
 using System.Threading.Tasks;
 using Archipelago.MultiClient.Net.Packets;
 using HarmonyLib.Tools;
-using UnityEngine.SceneManagement;
-using System.Linq;
 
 namespace CoDArchipelago
 {
@@ -18,16 +14,10 @@ namespace CoDArchipelago
         private void Awake()
         {
             HarmonyFileLog.Enabled = true;
-            
-            Logger.LogInfo($"{PluginInfo.PLUGIN_GUID} is loaded!");
-            // Logger.LogInfo($"{HarmonyFileLog.FileWriterPath} is loaded!");
-            Patcher.Patch();
 
-            // SceneManager.activeSceneChanged += (from, to) => {
-            //     if (to.name == "Game") {
-            //         ArchipelagoContext.Init();
-            //     }
-            // };
+            Logger.LogInfo($"{PluginInfo.PLUGIN_GUID} is loaded!");
+
+            Patcher.Patch();
         }
 
         private void OnDestroy()

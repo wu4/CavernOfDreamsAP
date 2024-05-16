@@ -1,14 +1,10 @@
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Bindings;
 using static CoDArchipelago.CodeMatchHelpers;
 
 namespace CoDArchipelago
@@ -76,7 +72,7 @@ namespace CoDArchipelago
             */
         }
     }
-    
+
     static class InitPatches
     {
         [HarmonyPatch(typeof(GlobalHub), "Awake")]
@@ -92,19 +88,21 @@ namespace CoDArchipelago
                 ChangeStartLocation.SetStartLocation("Cavern of Dreams - Sage");
             }
 
-            static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
-            {
+            static IEnumerable<CodeInstruction> Transpiler(
+                IEnumerable<CodeInstruction> instructions,
+                ILGenerator generator
+            ) {
                 var matcher = new CodeMatcher(instructions, generator);
-                
+
                 matcher.MatchForward(
                     false,
                     Calls<UnityEngine.Object, Area>("FindObjectOfType"),
                     new(OpCodes.Stloc_0)
                 );
                 matcher.ThrowIfInvalid("Start of removal range");
-                
+
                 int startPos = matcher.Pos;
-                
+
                 var matcherClone = matcher.Clone();
                 int endPos = matcherClone.MatchForward(
                     false,
@@ -118,12 +116,12 @@ namespace CoDArchipelago
                 matcher.RemoveInstructions(
                     endPos - startPos
                 );
-                
+
                 matcher.Advance(1);
                 matcher.Insert(
                     CodeInstruction.Call(typeof(InitPatch), nameof(InitPatch.Init))
                 );
-                
+
                 return matcher.InstructionEnumeration();
             }
         }
