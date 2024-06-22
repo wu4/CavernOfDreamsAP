@@ -1,23 +1,21 @@
-
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using CoDArchipelago.GlobalGameScene;
 
-namespace CoDArchipelago
+namespace CoDArchipelago.MenuPatching
 {
-    class MenuPatches : InstantiateOnGameSceneLoad
+    class Patcher : InstantiateOnGameSceneLoad
     {
         static MenuPageHandsFactory menuPageHandsFactory;
 
         [LoadOrder(int.MinValue + 1)]
-        public MenuPatches()
+        public Patcher()
         {
             menuPageHandsFactory = new(GameScene.FindInScene("Rendering", "Canvas/TotalsMenu/Header").gameObject);
         }
-        
+
         public static void AddPageToMenu(MenuScreen menu, CursorPage page, bool append = true)
         {
             IEnumerable<CursorPage> pages = menu.GetComponentsInChildren<CursorPage>();
@@ -26,7 +24,7 @@ namespace CoDArchipelago
             if (numPages == 1) {
                 menuPageHandsFactory.AddToMenu(menu);
             }
-            
+
             GameObject.DestroyImmediate(page.transform.Find("MenuCursor").gameObject);
             page.cursorImage = menu.transform.Find("MenuCursor").GetComponent<Image>();
 

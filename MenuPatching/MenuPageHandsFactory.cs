@@ -1,10 +1,12 @@
 using TMPro;
 using UnityEngine;
-using UnityEngine.Animations;
 using UnityEngine.UI;
 
-namespace CoDArchipelago
+namespace CoDArchipelago.MenuPatching
 {
+    ///<summary>
+    ///A helper class for adding the little pointing hands to menu headers.
+    ///</summary>
     class MenuPageHandsFactory
     {
         readonly GameObject baseHeader;
@@ -17,12 +19,12 @@ namespace CoDArchipelago
             this.baseHeader.name = "MenuHands";
             this.baseHeader.SetActive(false);
         }
-        
+
         public void AddToMenu(MenuScreen menu)
         {
             GameObject header = GameObject.Instantiate(baseHeader, menu.transform);
             header.SetActive(true);
-        
+
             menu.flipLeftImage = header.transform.Find("FlipLeftImage").GetComponent<Image>();
             menu.flipRightImage = header.transform.Find("FlipRightImage").GetComponent<Image>();
         }
