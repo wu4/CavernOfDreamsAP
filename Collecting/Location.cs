@@ -1,21 +1,30 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using HarmonyLib;
-using UnityEngine;
-using CoDArchipelago.VisualPatches;
 
 namespace CoDArchipelago.Collecting
 {
     static class Location
     {
+        static readonly Dictionary<string, Action> locationTriggers = new();
+        public static void RegisterTrigger(string locationFlag, Action action) =>
+            locationTriggers.Add(locationFlag, action);
+
+        class ResetTriggersOnLoad : InstantiateOnGameSceneLoad
+        {
+            [LoadOrder(int.MinValue)]
+            public ResetTriggersOnLoad() => locationTriggers.Clear();
+        }
+
         public static Dictionary<string, Item> checks = new(){
-            // {"LOCATION_NOTE_CAVE2",                  new ClientItem("SKILL_CLIMB")},
+            {"LOCATION_NOTE_CAVE2",                  new MyItem("SKILL_CLIMB")},
             {"LOCATION_LAKE_BELL_RANG",              new MyItem("FELLA_LAKE1")},
             {"LOCATION_NOTE_CAVE46",                 new MyItem("TELEPORT_LAKE")},
             // {"LOCATION_NOTE_CAVE2",                  new ClientItem("FELLA_LAKE1")},
-            {"LOCATION_SKILL_ATTACK",                new MyItem("SKILL_GROUNDATTACK")},
+            {"LOCATION_SKILL_ATTACK",                new MyItem("ITEM_FISH_FOOD")},
+            {"LOCATION_NOTE_CAVE9",                  new TheirItem(0, "lad", true)},
+            {"LOCATION_NOTE_CAVE10",                 new TheirItem(0, "woah", false)},
             {"LOCATION_NOTE_CAVE3",                  new MyItem("GRATITUDE2")},
             {"LOCATION_NOTE_CAVE4",                  new MyItem("GRATITUDE3")},
             {"LOCATION_NOTE_CAVE5",                  new MyItem("GRATITUDE4")},
@@ -51,7 +60,7 @@ namespace CoDArchipelago.Collecting
             // {"LOCATION_PALACE_LOBBY_WHIRLPOOL_ON",   new ClientItem("NOTE_CAVE62")},
             // {"LOCATION_PALACE_LOBBY_FAUCET_ON",      new ClientItem("NOTE_CAVE63")},
         };
-        
+
         // [HarmonyPatch(typeof(Save), nameof(Save.GetFlag))]
         // static class GetFlagPatch
         // {
@@ -61,16 +70,6 @@ namespace CoDArchipelago.Collecting
         //     }
         // }
         // 
-
-        class ResetTriggersOnLoad : InstantiateOnGameSceneLoad
-        {
-            [LoadOrder(int.MinValue)]
-            public ResetTriggersOnLoad() => locationTriggers.Clear();
-        }
-
-        static readonly Dictionary<string, Action> locationTriggers = new();
-        public static void RegisterTrigger(string locationFlag, Action action) =>
-            locationTriggers.Add(locationFlag, action);
 
         [HarmonyPatch(typeof(Save), nameof(Save.SetFlag))]
         static class SetFlagPatch

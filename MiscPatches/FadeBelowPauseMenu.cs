@@ -1,6 +1,6 @@
 using CoDArchipelago.GlobalGameScene;
 using UnityEngine;
-namespace CoDArchipelago
+namespace CoDArchipelago.MiscPatches
 {
     class FadeBelowPauseMenu : InstantiateOnGameSceneLoad
     {

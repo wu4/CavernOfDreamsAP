@@ -13,11 +13,11 @@ namespace CoDArchipelago.VisualPatches
 
         public Replaces(Enum type) =>
             this.type = type;
-        
+
         public Replaces(Dictionary<string, List<string>> gameItemsToReplace) =>
             this.gameItemsToReplace = gameItemsToReplace;
     }
-    
+
     abstract class StaticObjectPatcher : ObjectPatcher
     {
         protected GameObject staticReplacement;
@@ -28,7 +28,8 @@ namespace CoDArchipelago.VisualPatches
 
     abstract class ObjectPatcher
     {
-        public static Replaces replaces;
+        // meant to be overridden by inheritors
+        public static readonly Replaces replaces = null;
 
         static Transform _container;
         protected static Transform Container {get => _container;}
@@ -61,7 +62,7 @@ namespace CoDArchipelago.VisualPatches
                 return null;
             }
         }
-        
+
         protected GameObject ReplaceWith(GameObject toReplace, GameObject replaceWith)
         {
             GameObject newObject = UnityEngine.Object.Instantiate(replaceWith, new Transform());
@@ -75,7 +76,7 @@ namespace CoDArchipelago.VisualPatches
 
             return newObject;
         }
-        
+
         public abstract void CollectJingle();
 
         public abstract GameObject Replace(GameObject toReplace, Collecting.Item item);

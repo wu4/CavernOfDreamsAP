@@ -1,10 +1,7 @@
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
-using UnityEngine;
-using static CoDArchipelago.CodeMatchHelpers;
+using static CoDArchipelago.CodeGenerationHelpers;
 
 namespace CoDArchipelago.SkillPatches
 {
@@ -26,7 +23,7 @@ namespace CoDArchipelago.SkillPatches
             static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
             {
                 var matcher = new CodeMatcher(instructions, generator);
-                
+
                 matcher.MatchForward(
                     true,
                     new(OpCodes.Ldarg_0),

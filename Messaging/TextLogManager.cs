@@ -3,7 +3,6 @@ using CoDArchipelago.GlobalGameScene;
 using HarmonyLib;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.Localization.SmartFormat.Utilities;
 
 namespace CoDArchipelago.Messaging
 {
@@ -15,6 +14,7 @@ namespace CoDArchipelago.Messaging
         static InputAction sendChatAction;
         static InputAction closeChatAction;
 
+        static bool isOpen;
 
         [LoadOrder(int.MinValue + 1)]
         public TextLogManager()
@@ -28,7 +28,7 @@ namespace CoDArchipelago.Messaging
             closeChatAction.Enable();
 
             textLog = new();
-            textLogInputField = TextLogInputField.Create(textLog.gameObject.transform);
+            textLogInputField = TextLogInputField.Create(textLog.masterContainer.transform);
 
             textLogInputField.OnSelected += (eventData) => {
                 if (!isOpen) {
@@ -37,14 +37,14 @@ namespace CoDArchipelago.Messaging
                 }
             };
 
-            textLogInputField.OnDeselected += (eventData) => {
-                if (isOpen) {
-                    PlayCloseSound();
-                    Close();
-                }
-            };
+            // textLogInputField.OnDeselected += (eventData) => {
+            //     if (isOpen) {
+            //         PlayCloseSound();
+            //         Close();
+            //     }
+            // };
         }
-        
+
         public static void AddLine(string line) =>
             textLog.AddLine(line);
 
@@ -52,7 +52,7 @@ namespace CoDArchipelago.Messaging
         {
             static CinemachineInputProvider cameraControl;
             static InputActionReference storedCameraInputActionReference;
-            
+
             public static void Init()
             {
                 cameraControl = GameScene.FindInScene("Cameras", "CM Standard").GetComponent<CinemachineInputProvider>();
@@ -73,18 +73,16 @@ namespace CoDArchipelago.Messaging
                 cameraControl.XYAxis = storedCameraInputActionReference;
             }
         }
-        
-        static bool isOpen;
-        
+
         static void PlaySendSound() =>
             MenuHandler.Instance.menuSelect.Play();
-        
+
         static void PlayOpenSound() =>
             MenuHandler.Instance.menuOpen.Play();
-        
+
         static void PlayCloseSound() =>
             MenuHandler.Instance.menuClose.Play();
-        
+
         static void Open()
         {
             PlayerInputController.Disable();
@@ -107,29 +105,26 @@ namespace CoDArchipelago.Messaging
             if (!isOpen) {
                 PlayOpenSound();
                 Open();
-                // inputField.ActivateInputField();
             } else {
                 if (textLogInputField.text != "") {
                     PlaySendSound();
                     AddLine(textLogInputField.text);
                     textLogInputField.text = "";
                 } else {
-                    MenuHandler.Instance.menuClose.Play();
+                    PlayCloseSound();
                 }
                 Close();
-                // inputField.DeactivateInputField();
             }
         }
-        
+
         static void CloseButtonPressed()
         {
             if (isOpen) {
                 PlayCloseSound();
                 Close();
-                // inputField.DeactivateInputField();
             }
         }
-        
+
         static void Update()
         {
             bool show_cursor = GlobalHub.Instance.IsPaused() || isOpen;
@@ -149,7 +144,7 @@ namespace CoDArchipelago.Messaging
                     SendButtonPressed();
                 }
             }
-            
+
             textLog.Update(isOpen);
         }
 

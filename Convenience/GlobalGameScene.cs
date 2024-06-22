@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using HarmonyLib;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -27,7 +26,7 @@ namespace CoDArchipelago.GlobalGameScene
                 .GetRootGameObjects()
                 .Where(x => x.name != "AP Container")
                 .SelectMany(x => x.GetComponentsInChildren<T>(includeInactive));
-        
+
         public static Area GetContainingArea(Transform transform) {
             if (transform.parent == null)
                 return null;

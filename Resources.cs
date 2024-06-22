@@ -1,12 +1,4 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
-using Archipelago.MultiClient.Net.Packets;
-using HarmonyLib;
 using UnityEngine;
-using UnityEngine.Animations;
-using UnityEngine.UI;
 using CoDArchipelago.GlobalGameScene;
 
 namespace CoDArchipelago

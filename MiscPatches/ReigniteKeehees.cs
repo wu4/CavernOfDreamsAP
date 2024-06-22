@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using HarmonyLib;
 
-namespace CoDArchipelago
+namespace CoDArchipelago.MiscPatches
 {
     /// <summary>
     /// Reignites all doused Keehees upon leaving the area

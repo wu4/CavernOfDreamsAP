@@ -1,6 +1,6 @@
 using HarmonyLib;
 
-namespace CoDArchipelago
+namespace CoDArchipelago.MiscPatches
 {
     static class SaveInitializePatch
     {

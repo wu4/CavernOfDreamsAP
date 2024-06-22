@@ -1,17 +1,11 @@
 using HarmonyLib;
 using UnityEngine;
 using System.Collections.Generic;
-using UnityEngine.Localization.Settings;
-using UnityEngine.Localization.Tables;
-using UnityEngine.Localization;
-using System.Linq;
-using System.Reflection;
 using System.Reflection.Emit;
 using System;
-using System.Runtime.CompilerServices;
-using static CoDArchipelago.CodeMatchHelpers;
+using static CoDArchipelago.CodeGenerationHelpers;
 
-namespace CoDArchipelago
+namespace CoDArchipelago.MiscPatches
 {
     // [InitOnGameLoad]
     static class DialogPatches
@@ -19,7 +13,7 @@ namespace CoDArchipelago
         static readonly Dictionary<string, string> staticDialogPatches = new() {
             {"/CAVE/Sun Cavern (Main)/Cutscenes/Sage Cutscenes/Sage Post Intro/SageDialog", "lad u cannot be srs"}
         };
-        
+
         class ResetDialogPatches : InstantiateOnGameSceneLoad
         {
             [LoadOrder(int.MinValue)]
@@ -32,7 +26,7 @@ namespace CoDArchipelago
         static readonly Dictionary<string, Func<Dialog, string>> dynamicDialogPatches = new();
         public static void RegisterDynamicDialogPatch(string path, Func<Dialog, string> func) =>
             dynamicDialogPatches.Add(path, func);
-        
+
         public static string TryGetPatchText(Dialog dialog) {
             string path = dialog.transform.GetPath();
             if (staticDialogPatches.TryGetValue(path, out string newDialog)) {
@@ -46,14 +40,14 @@ namespace CoDArchipelago
 
             return null;
         }
-        
+
         [HarmonyPatch(typeof(UIController), nameof(UIController.StartDialog))]
         static class DynamicDialogPatch
         {
             static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
             {
                 var matcher = new CodeMatcher(instructions, generator);
-                
+
                 matcher.MatchForward(
                     false,
                     new(OpCodes.Ldarg_1),
@@ -61,7 +55,7 @@ namespace CoDArchipelago
                     new(OpCodes.Stloc_0)
                 );
                 matcher.ThrowIfInvalid("Dynamic dialog, GetText");
-                
+
                 matcher.CreateLabelAt(matcher.Pos + 2, out Label store);
 
                 matcher.Insert(
@@ -72,17 +66,15 @@ namespace CoDArchipelago
                 return matcher.InstructionEnumeration();
             }
         }
-        
-        /*
-        static void Init()
-        {
-            foreach (var kv in staticDialogPatches) {
-                var root = GameScene.GetRootObjectByName(kv.Key);
-                foreach (var kv2 in kv.Value) {
-                    root.transform.Find(kv2.Key).GetComponent<Dialog>().text.PatchText(kv2.Value);
-                }
-            }
-        }
-        */
+
+        // static void Init()
+        // {
+        //     foreach (var kv in staticDialogPatches) {
+        //         var root = GameScene.GetRootObjectByName(kv.Key);
+        //         foreach (var kv2 in kv.Value) {
+        //             root.transform.Find(kv2.Key).GetComponent<Dialog>().text.PatchText(kv2.Value);
+        //         }
+        //     }
+        // }
     }
 }

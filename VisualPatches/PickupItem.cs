@@ -7,7 +7,7 @@ namespace CoDArchipelago.VisualPatches
 {
     class PickupItem : ObjectPatcher
     {
-        public static new Replaces replaces = new(CollectibleItem.CollectibleType.ITEM);
+        public static readonly new Replaces replaces = new(CollectibleItem.CollectibleType.ITEM);
 
         readonly GameObject fishFoodObject;
         readonly GameObject[] ladyOpalEggObjects;
@@ -47,7 +47,7 @@ namespace CoDArchipelago.VisualPatches
             Cutscenes.Patching.PatchCutscene(getItemCutscene, Cutscenes.WLOptions.Interrupt, "PlayerGetItemPose");
             getItemCutscene.durationAfterFinal = 45;
             getItemCutscene.destroyOnFinish = false;
-            
+
             return getItemCutscene;
         }
 
@@ -63,10 +63,10 @@ namespace CoDArchipelago.VisualPatches
                 col.cutscene = getItemCutscene;
                 col.type = Collectible.CollectibleType.ITEM;
             }
-            
+
             return ladyOpalEggObjects;
         }
-        
+
         GameObject CreateFishFoodObject(Cutscene getItemCutscene)
         {
             Transform fishFoodHolder = GameScene.FindInScene("LAKE", "Bedroom/Collectibles/FishFoodHolder");

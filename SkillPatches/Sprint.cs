@@ -1,9 +1,8 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection.Emit;
 using HarmonyLib;
 using UnityEngine;
-using static CoDArchipelago.CodeMatchHelpers;
+using static CoDArchipelago.CodeGenerationHelpers;
 
 namespace CoDArchipelago.SkillPatches
 {
@@ -33,7 +32,7 @@ namespace CoDArchipelago.SkillPatches
 
             PlayerAccess.Fields.momentum.Set(player, Mathf.Clamp(momentum + (Time.deltaTime * 0.3f), minSprintMomentum, maxSprintMomentum));
         }
-        
+
 
         [HarmonyPatch(typeof(Player), "UpdateInputs")]
         static class Patch
@@ -49,7 +48,7 @@ namespace CoDArchipelago.SkillPatches
                 );
 
                 matcher.Insert(
-                    new(OpCodes.Ldarg_0), CodeInstruction.Call(typeof(Sprint), nameof(UpdateSprint))
+                    new(OpCodes.Ldarg_0), Call(typeof(Sprint), nameof(UpdateSprint))
                 );
 
                 matcher.MatchForward(
@@ -66,12 +65,12 @@ namespace CoDArchipelago.SkillPatches
                 matcher.CreateLabel(out Label goNextBlock);
 
                 matcher.Insert(
-                    new(OpCodes.Ldarg_0),         CodeInstruction.Call(typeof(Player), "CarryingTorpedoWhileUnderwater"), new(OpCodes.Brtrue_S, goNextBlock),
+                    new(OpCodes.Ldarg_0),         Call<Player>("CarryingTorpedoWhileUnderwater"), new(OpCodes.Brtrue_S, goNextBlock),
                     // new(OpCodes.Ldsfld, sprintInfo), new(OpCodes.Brtrue_S, goNextBlock),
-                    CodeInstruction.LoadField(typeof(FlagCache.CachedSkillFlags), nameof(FlagCache.CachedSkillFlags.sprint)), new(OpCodes.Brtrue_S, goNextBlock),
+                    LoadField(typeof(FlagCache.CachedSkillFlags), nameof(FlagCache.CachedSkillFlags.sprint)), new(OpCodes.Brtrue_S, goNextBlock),
                     // new(OpCodes.Ldstr, "SPRINT"), CodeInstruction.Call(typeof(Skills), nameof(HasSkill)), new(OpCodes.Brtrue_S, goNextBlock),
 
-                    new(OpCodes.Ldarg_0), new(OpCodes.Ldc_R4, 0f), CodeInstruction.StoreField(typeof(Player), "momentum"),
+                    new(OpCodes.Ldarg_0), new(OpCodes.Ldc_R4, 0f), StoreField<Player>("momentum"),
 
                     leaveOp
                 );

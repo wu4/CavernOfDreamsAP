@@ -1,5 +1,5 @@
 using CoDArchipelago.GlobalGameScene;
-namespace CoDArchipelago
+namespace CoDArchipelago.MiscPatches
 {
     class HeavensPathPatches : InstantiateOnGameSceneLoad
     {
@@ -8,7 +8,7 @@ namespace CoDArchipelago
             ShiftFinishLineDoorBackwards();
             Collecting.MyItem.RegisterTrigger("PALACE_SANCTUM_RACE_FINISHED", OpenFellaGate);
         }
-        
+
         static void OpenFellaGate(bool randomized)
         {
             var area = GlobalHub.Instance.GetArea();
@@ -28,7 +28,7 @@ namespace CoDArchipelago
 
             raise.Activate();
         }
-        
+
         /// <summary>
         /// Shift Heaven's Path finish door backwards to enable finishing the
         /// race with it still closed

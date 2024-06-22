@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using UnityEngine;
-using static CoDArchipelago.CodeMatchHelpers;
+using static CoDArchipelago.CodeGenerationHelpers;
 
 namespace CoDArchipelago
 {
@@ -47,29 +47,25 @@ namespace CoDArchipelago
                         throw e;
                     }
                 }
-                /*
-                Parallel.ForEach(
-                    constructorGroup,
-                    c => {
-                        var (ClassName, Constructor) = c;
-                        try {
-                            Debug.Log("Firing constructor for " + ClassName);
-                            // var start = DateTime.Now;
-                            Constructor.Invoke(new object[] {});
-                            // timings.Add(ClassName, (DateTime.Now - start).TotalSeconds);
-                        } catch (Exception e) {
-                            Debug.LogError("Error during constructor for " + ClassName + ":");
-                            throw e;
-                        }
-                    }
-                );
-                */
+                // Parallel.ForEach(
+                //     constructorGroup,
+                //     c => {
+                //         var (ClassName, Constructor) = c;
+                //         try {
+                //             Debug.Log("Firing constructor for " + ClassName);
+                //             // var start = DateTime.Now;
+                //             Constructor.Invoke(new object[] {});
+                //             // timings.Add(ClassName, (DateTime.Now - start).TotalSeconds);
+                //         } catch (Exception e) {
+                //             Debug.LogError("Error during constructor for " + ClassName + ":");
+                //             throw e;
+                //         }
+                //     }
+                // );
             }
-            /*
-            foreach ((var name, var val) in timings.OrderByDescending(i => i.Value)) {
-                Debug.Log(name + ": " + val + "s");
-            }
-            */
+            // foreach ((var name, var val) in timings.OrderByDescending(i => i.Value)) {
+            //     Debug.Log(name + ": " + val + "s");
+            // }
         }
     }
 
@@ -85,7 +81,7 @@ namespace CoDArchipelago
 
                 GameSceneLoadMethods.Invoke();
 
-                ChangeStartLocation.SetStartLocation("Cavern of Dreams - Sage");
+                MiscPatches.ChangeStartLocation.SetStartLocation("Cavern of Dreams - Sage");
             }
 
             static IEnumerable<CodeInstruction> Transpiler(

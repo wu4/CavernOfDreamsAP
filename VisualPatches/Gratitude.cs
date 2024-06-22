@@ -1,14 +1,11 @@
 using UnityEngine;
 using CoDArchipelago.GlobalGameScene;
-using CoDArchipelago.Collecting;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace CoDArchipelago.VisualPatches
 {
     class Gratitude : StaticObjectPatcher
     {
-        public static new Replaces replaces = new(CollectibleItem.CollectibleType.GRATITUDE);
+        public static readonly new Replaces replaces = new(CollectibleItem.CollectibleType.GRATITUDE);
 
         public override void CollectJingle()
         {

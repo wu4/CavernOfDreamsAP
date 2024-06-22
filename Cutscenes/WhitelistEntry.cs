@@ -66,7 +66,7 @@ namespace CoDArchipelago.Cutscenes
                         .Where(cutscene => !cutscene.interrupt && cutscene.flag == flagName);
                     foreach (Cutscene cutscene in thisCutscenes) {
                         string path = cutscene.transform.GetPath();
-                        
+
                         if (!patchedCutscenes.Contains(cutscene))
                             unculledCutscenePaths.Add(path);
                     }
@@ -77,14 +77,14 @@ namespace CoDArchipelago.Cutscenes
                 }
             }
         }
-        
+
         static readonly HashSet<Cutscene> patchedCutscenes = new();
-    
+
         public void PatchCutscene(Cutscene cutscene)
         {
-            cutscene.interrupt = (options & WLOptions.Interrupt) == WLOptions.Interrupt;
+            cutscene.interrupt = options.HasFlag(WLOptions.Interrupt);
 
-            if ((options & WLOptions.MakeFast) == WLOptions.MakeFast) {
+            if (options.HasFlag(WLOptions.MakeFast)) {
                 cutscene.durationAfterFinal = 1;
 
                 cutscene.GetComponentsInChildren<Event>(true).Do(MakeEventFast);
@@ -99,7 +99,7 @@ namespace CoDArchipelago.Cutscenes
                     cursor--;
                 }
             }
-            
+
             patchedCutscenes.Add(cutscene);
         }
     }

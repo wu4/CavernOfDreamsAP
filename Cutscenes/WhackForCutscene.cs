@@ -14,13 +14,13 @@ namespace CoDArchipelago.Cutscenes
             WhackForCutscene __instance,
             Whackable.WhackType type,
             GameObject source,
-            
+
             ref bool ___whacked,
-            
+
             ref bool __result
         ) {
             if (!Data.eventItems.ContainsKey(__instance.cutscene.flag)) return true;
-            
+
             if (GlobalHub.Instance.save.GetFlag("LOCATION_" + __instance.cutscene.flag).On()) {
                 __result = false;
                 return false;

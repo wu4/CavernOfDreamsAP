@@ -1,9 +1,7 @@
 using System.Collections.Generic;
-using CoDArchipelago;
 using CoDArchipelago.GlobalGameScene;
 using HarmonyLib;
 using UnityEngine;
-using CoDArchipelago.Cutscenes;
 
 namespace CoDArchipelago
 {
@@ -22,7 +20,7 @@ namespace CoDArchipelago
             return false;
         }
     }
-    
+
     class MonsterPatches : InstantiateOnGameSceneLoad
     {
         static readonly string[] cutsceneTriggerPaths = new[] {
@@ -32,29 +30,29 @@ namespace CoDArchipelago
             "Sky (Main)/Cutscenes/EnableHelloTrigger",
             "Sky (Main)/Cutscenes/MonsterEyeOpenCSTRigger", // not a typo
         };
-        
-        static readonly Dictionary<string, WhitelistEntry> whitelists = new() {
+
+        static readonly Dictionary<string, Cutscenes.WhitelistEntry> whitelists = new() {
             {"Monster/Rotate (Inside Monster)/Cutscenes/RemoveAllBoilsCutscene", new(
-                WLOptions.MakeFast,
+                Cutscenes.WLOptions.MakeFast,
                 "OpenControlGrate",
                 "PlayCreakHingeSlowSFX"
             )},
             {"Monster/Rotate (Inside Monster)/Cutscenes/OpenTailGateCutscene", new(
-                WLOptions.None,
+                Cutscenes.WLOptions.None,
                 "OpenTailGate",
                 "PlayCreakHingeSFX"
             )},
             {"Monster/Rotate (Inside Monster)/Cutscenes/HeartGateOpenCutscene", new(
-                WLOptions.MakeFast,
+                Cutscenes.WLOptions.MakeFast,
                 "OpenHeartGate"
             )},
             {"Monster/Rotate (Inside Monster)/Cutscenes/HeartGateCloseCutscene", new(
-                WLOptions.MakeFast,
+                Cutscenes.WLOptions.MakeFast,
                 "PlayFailureSFX",
                 "CloseHeartGate"
             )},
             {"Monster/Rotate (Inside Monster)/Cutscenes/OpenTestChubesCutscene", new(
-                WLOptions.None,
+                Cutscenes.WLOptions.None,
                 "OpenTestChubeDumpling",
                 "DumplingChangeTint",
                 "OpenTestChube",
@@ -68,21 +66,21 @@ namespace CoDArchipelago
                 "RemoveDumpling"
             )},
             {"Monster/NoRotate (Inside Monster)/Cutscenes/RotateMonsterLeft", new(
-                WLOptions.None,
+                Cutscenes.WLOptions.None,
                 "MoveChair",
                 "MoveCrate",
                 "ChangeCrateColor"
             )},
-            {"Monster/NoRotate (Inside Monster)/Cutscenes/RotateMonsterMiddle", new(WLOptions.None)},
+            {"Monster/NoRotate (Inside Monster)/Cutscenes/RotateMonsterMiddle", new(Cutscenes.WLOptions.None)},
             {"Monster/NoRotate (Inside Monster)/Cutscenes/RotateMonsterRight", new(
-                WLOptions.None,
+                Cutscenes.WLOptions.None,
                 "MoveChair",
                 "MoveCrate",
                 "ChangeCrateColor"
             )},
-            
+
             {"Heart/Cutscenes/HeartRoomSuccessCutscene", new(
-                WLOptions.None,
+                Cutscenes.WLOptions.None,
                 "StartLightning",
                 "StartLightning (1)",
                 "StartLightning (2)",
@@ -100,9 +98,9 @@ namespace CoDArchipelago
         {
             RemoveCutsceneTriggers();
             RemoveMonsterEyeFlag();
-            Patching.PatchCutsceneList("MONSTER", whitelists);
+            Cutscenes.Patching.PatchCutsceneList("MONSTER", whitelists);
         }
-        
+
         static void RemoveCutsceneTriggers()
         {
             Transform root = GameScene.GetRootObjectByName("MONSTER").transform;
@@ -110,7 +108,7 @@ namespace CoDArchipelago
                 GameObject.Destroy(root.Find(triggerPath).gameObject);
             }
         }
-        
+
         /// <summary>
         /// Sets Mr. Kerrington's eye flag to something that is always set,
         /// effectively making it always open

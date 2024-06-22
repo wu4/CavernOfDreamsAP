@@ -1,7 +1,7 @@
 using UnityEngine;
 using CoDArchipelago.GlobalGameScene;
 
-namespace CoDArchipelago
+namespace CoDArchipelago.MiscPatches
 {
     class PalacePatches : InstantiateOnGameSceneLoad
     {

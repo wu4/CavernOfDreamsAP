@@ -1,4 +1,3 @@
-using UnityEngine;
 using CoDArchipelago.GlobalGameScene;
 
 namespace CoDArchipelago
@@ -11,7 +10,7 @@ namespace CoDArchipelago
 
             Collecting.Location.RegisterTrigger("LOCATION_PALACE_DINING_ROOM_RISEN", PressButton);
         }
-        
+
         /// <summary>
         /// Removes the button press animation from the throne-raise cutscene
         /// </summary>

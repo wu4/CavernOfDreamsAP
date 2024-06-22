@@ -1,13 +1,11 @@
-using System;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 
-namespace CoDArchipelago
+namespace CoDArchipelago.SkillMenuPatches
 {
     class MO_CARRYABLE : MenuOption
     {
         public Carryable carryable;
-        
+
         Access.Action<Player> pickUp = new("PickUpObject");
 
         public override bool OnSelect()

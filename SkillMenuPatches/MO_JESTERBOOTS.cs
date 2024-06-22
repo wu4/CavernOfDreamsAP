@@ -1,7 +1,6 @@
-using System;
 using UnityEngine;
 
-namespace CoDArchipelago
+namespace CoDArchipelago.SkillMenuPatches
 {
     class MO_JESTERBOOTS : MenuOptionToggle
     {
@@ -14,7 +13,7 @@ namespace CoDArchipelago
 
         protected override bool IsOn()
             => GlobalHub.Instance.player.WearingHoverBoots();
-        
+
         public static MO_JESTERBOOTS Replace(MO_FLAG flag)
         {
             GameObject obj = flag.gameObject;

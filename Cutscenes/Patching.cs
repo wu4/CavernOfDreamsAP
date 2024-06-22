@@ -1,7 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using HarmonyLib;
 using UnityEngine;
 using CoDArchipelago.GlobalGameScene;
@@ -30,7 +27,7 @@ namespace CoDArchipelago.Cutscenes
         {
             new WhitelistEntry(options, whitelist).PatchCutscene(GameScene.FindInScene(rootName, cutscenePath).GetComponent<Cutscene>());
         }
-        
+
         public static void PatchCutsceneList(string worldName, Dictionary<string, WhitelistEntry> whitelist) {
             GameObject root = GameScene.GetRootObjectByName(worldName);
             foreach ((string path, WhitelistEntry entry) in whitelist) {
@@ -100,6 +97,12 @@ namespace CoDArchipelago.Cutscenes
                         WLOptions.None,
                         "LowerHedgeMazeGate"
                     )},
+                    {"Gallery Lobby/HedgeMaze/Objects/DeadRose/GrowDeadRoseCutscene", new(
+                        WLOptions.None,
+                        "ShrinkRoseWilted",
+                        "GrowRoseWatered",
+                        "GrowSFX"
+                    )},
                 }},
 
                 {"LAKE", new() {
@@ -146,7 +149,7 @@ namespace CoDArchipelago.Cutscenes
                         "RaisePlatform",
                         "RaisePlatformSFX"
                     )},
-                    
+
                     {"Church/Cutscenes/ChurchSuccess", new(
                         WLOptions.None,
                         "SlideTile"
@@ -154,7 +157,7 @@ namespace CoDArchipelago.Cutscenes
                 }},
 
                 // {"LAKE/Church/Cutscenes/ChurchSuccess", (false, true, new int[2]{0, 5})},
-                
+
                 {"PALACE", new() {
                     // {"Valley (Main)/Cutscenes/PALACE_MELTED_ICE", new(WLOptions.MakeFast)},
                     {"Valley (Main)/Cutscenes/PALACE_MORAY_AWAKE", new(WLOptions.MakeFast)},
@@ -180,7 +183,7 @@ namespace CoDArchipelago.Cutscenes
                         "RaiseDoor1",
                         "RaiseDoor2"
                     )},
-                    
+
                     {"Palace/Cutscenes/PALACE_SENTRIES_DISABLED", new(
                         WLOptions.MakeFast,
                         "DisableSentry",
@@ -226,7 +229,7 @@ namespace CoDArchipelago.Cutscenes
                     )},
                 }},
                 // {"PALACE/Valley (Main)/Cutscenes/PALACE_MELTED_ICE", (false, true, new int[7]{8, 11, 12, 13, 14, 15, 16})},
-                
+
                 {"GALLERY", new() {
                     {"Earth Lobby/Cutscenes/OpenMonsterShortcut", new(
                         WLOptions.None,
@@ -242,30 +245,30 @@ namespace CoDArchipelago.Cutscenes
                         "FadeOutArtworkUnfinished",
                         "DestroyDragonSkullGem"
                     )},
-                    
+
                     {"Foyer (Main)/Cutscenes/SagePaintingSuccess", new(
                         WLOptions.None,
                         "OpenEarthLobby",
                         "OpenFireLobby"
                     )},
-                    
+
                     {"Fire Lobby/Cutscenes/MonsterPaintingSuccessCutscene", new(
                         WLOptions.None,
                         "FryingPansExtend",
                         "RaiseSFX"
                     )},
-                    
+
                     {"Water Lobby/Cutscenes/FinishPrincessPainting", new(
                         WLOptions.None,
                         "FadeOutArtworkUnfinished",
                         "OpenChest"
                     )},
-                    
+
                     {"Water Lobby/Cutscenes/AngelStatueShadowsSuccess", new(
                         WLOptions.None,
                         "OpenChest"
                     )},
-                    
+
                     {"Water Lobby/Cutscenes/HealGiant", new(
                         WLOptions.None,
                         "HealGiantManual",

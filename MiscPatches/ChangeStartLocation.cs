@@ -1,4 +1,3 @@
-
 using TMPro;
 using HarmonyLib;
 using UnityEngine;
@@ -8,7 +7,7 @@ using Cinemachine;
 using System.Collections.Generic;
 using CoDArchipelago.GlobalGameScene;
 
-namespace CoDArchipelago
+namespace CoDArchipelago.MiscPatches
 {
     class ChangeStartLocation : InstantiateOnGameSceneLoad
     {
@@ -27,13 +26,13 @@ namespace CoDArchipelago
 
             startWarpMenuOption = injectionTarget.AddComponent<MO_DEBUG_WARP>();
         }
-        
+
         class StartLocation
         {
             readonly Area area;
             readonly GameObject location;
             readonly bool startCamInFront;
-            
+
             public StartLocation(
                 string worldName, string areaName, string warpName,
                 Vector3 position, Quaternion rotation,
@@ -174,7 +173,7 @@ namespace CoDArchipelago
             static void Postfix()
             {
                 Transform t = ((GameObject)AccessTools.Field(typeof(GlobalHub), "positionStart").GetValue(GlobalHub.Instance)).transform;
-                
+
                 var rotationToSet = t.rotation;
 
                 rotationToSet *= Quaternion.Euler(90 * Vector3.right);

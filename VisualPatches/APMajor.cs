@@ -1,14 +1,12 @@
 using UnityEngine;
 using CoDArchipelago.GlobalGameScene;
 using CoDArchipelago.Collecting;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace CoDArchipelago.VisualPatches
 {
     class APMajor : StaticObjectPatcher
     {
-        public static new Replaces replaces = new(APCollectibleType.Major);
+        public static readonly new Replaces replaces = new(APCollectibleType.Major);
 
         public override void CollectJingle()
         {

@@ -6,7 +6,7 @@ namespace CoDArchipelago.VisualPatches
 {
     class Orb : StaticObjectPatcher
     {
-        public static new Replaces replaces = new(APCollectibleType.Ability);
+        public static readonly new Replaces replaces = new(APCollectibleType.Ability);
 
         public override void CollectJingle()
         {

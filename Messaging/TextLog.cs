@@ -1,40 +1,60 @@
-using Cinemachine;
-using UnityEngine.InputSystem;
 using UnityEngine;
 using System.Collections.Generic;
-using System.Linq;
 using TMPro;
 using UnityEngine.UI;
 using CoDArchipelago.GlobalGameScene;
-using UnityEngine.UIElements;
 using System;
 
 namespace CoDArchipelago.Messaging
 {
-    partial class TextLog
+    class TextLog
     {
         static TextLog Instance;
 
-        public readonly GameObject gameObject;
-        readonly GameObject textContainer;
+        public readonly GameObject masterContainer;
+        readonly HideableObject textHideable;
+        readonly HideableObject timedTextHideable;
+        readonly TextContainer textContainer;
+        readonly TimedTextContainer timedTextContainer;
 
-        readonly ScrollRect scrollRect;
-        
         class TextLogEntry
         {
-            public readonly DateTime time;
-            public readonly GameObject gameObject;
-            public readonly TextMeshProUGUI tmp;
-            
-            public TextLogEntry(string text)
+            protected readonly GameObject gameObject;
+            protected readonly TextMeshProUGUI tmp;
+
+            public TextLogEntry(string text, Transform parent)
             {
-                time = DateTime.Now;
-                gameObject = CreateLine(text, TextLog.Instance.textContainer.transform);
+                gameObject = CreateLine(text, parent);
                 tmp = gameObject.GetComponent<TextMeshProUGUI>();
             }
         }
-        
+
+        class TimedTextLogEntry : TextLogEntry
+        {
+            readonly DateTime time;
+
+            public TimedTextLogEntry(string text, Transform parent) : base(text, parent)
+            {
+                time = DateTime.Now;
+            }
+
+            public bool Update(DateTime now)
+            {
+                var timespan = now - time;
+
+                if (timespan.TotalSeconds < 4) return true;
+
+                tmp.alpha = 1f - ((float)(timespan.TotalMilliseconds - 4000) / 1000f);
+
+                if (timespan.TotalSeconds < 5) return true;
+
+                GameObject.Destroy(gameObject);
+                return false;
+            }
+        }
+
         readonly List<TextLogEntry> textLogEntries = new();
+        readonly List<TimedTextLogEntry> timedTextLogEntries = new();
 
         static GameObject CreateLine(string text, Transform parent)
         {
@@ -53,26 +73,123 @@ namespace CoDArchipelago.Messaging
 
         public void AddLine(string text)
         {
-            textLogEntries.Add(new(text));
+            textLogEntries.Add(new(text, TextLog.Instance.textContainer.gameObject.transform));
+            timedTextLogEntries.Add(new(text, TextLog.Instance.timedTextContainer.gameObject.transform));
         }
-        
+
+        bool storedIsOpen = false;
+
         public void Update(bool isOpen)
         {
-            var now = System.DateTime.Now;
+            if (storedIsOpen != isOpen) {
+                storedIsOpen = isOpen;
 
-            foreach (var entry in textLogEntries) {
-                if (isOpen) {
-                    entry.tmp.alpha = 1;
-                } else {
-                    var timespan = now - entry.time;
-                    if (timespan.TotalSeconds > 5) {
-                        entry.tmp.alpha = 0;
-                    } else if (timespan.TotalSeconds < 4) {
-                        entry.tmp.alpha = 1;
-                    } else {
-                        entry.tmp.alpha = 1f - ((float)(timespan.TotalMilliseconds - 4000) / 1000f);
-                    }
-                }
+                textHideable.SetVisible(isOpen);
+                timedTextHideable.SetVisible(!isOpen);
+            }
+
+            var now = System.DateTime.Now;
+            timedTextLogEntries.RemoveAll(t => !t.Update(now));
+        }
+
+
+        class TimedTextContainer
+        {
+            public readonly GameObject gameObject;
+
+            public TimedTextContainer(Transform parent)
+            {
+                gameObject = new("Timed Text");
+                gameObject.transform.SetParent(parent, false);
+
+                var ttc_tr = Helpers.CreatePaddedTransform(
+                    gameObject,
+                    bottomRightPadding: new(0, 30f),
+                    anchorMax: new(0.5f, 1),
+                    pivot: new(0, 0)
+                );
+
+                var csf = gameObject.AddComponent<ContentSizeFitter>();
+                csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+                var vlg = gameObject.AddComponent<VerticalLayoutGroup>();
+                vlg.childForceExpandHeight = false;
+                vlg.childForceExpandWidth = true;
+                vlg.childAlignment = TextAnchor.LowerLeft;
+            }
+        }
+
+        class TextContainer
+        {
+            readonly GameObject viewport;
+            public readonly GameObject gameObject;
+            readonly ScrollRect scrollRect;
+
+            public TextContainer(Transform parent)
+            {
+                viewport = new("Viewport");
+                viewport.transform.SetParent(parent, false);
+                viewport.AddComponent<RectMask2D>();
+
+                var viewport_rt = Helpers.CreatePaddedTransform(
+                    viewport,
+                    bottomRightPadding: new(0, 15f),
+                    anchorMax: new(0.5f, 1)
+                );
+
+                gameObject = new("Text");
+                gameObject.transform.SetParent(viewport.transform, false);
+
+                var t_tr = Helpers.CreatePaddedTransform(gameObject, pivot: Vector2.zero);
+
+                var csf = gameObject.AddComponent<ContentSizeFitter>();
+                csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+                var vlg = gameObject.AddComponent<VerticalLayoutGroup>();
+                vlg.childForceExpandHeight = false;
+                vlg.childForceExpandWidth = true;
+                vlg.childAlignment = TextAnchor.LowerLeft;
+
+                scrollRect = viewport.AddComponent<ScrollRect>();
+                scrollRect.viewport = viewport_rt;
+                scrollRect.scrollSensitivity = 5;
+                scrollRect.content = t_tr;
+            }
+        }
+
+        ///<summary>
+        /// Let me tell you a story about TextMeshProUGUIs. They are stubborn,
+        /// obnoxious, and ridiculous in how they initialize. If you add a
+        /// SINGLE TMPUGUI into an active GameObject whose parent is inactive,
+        /// that's it. You're fucked. The size of the rendered text will
+        /// forever be ruined. So you can't ever do that. So, what are you
+        /// going to do? Set the transparency of the container to max? Dude.
+        /// This is Unity. That's not a feature that exists. Nothing fucking
+        /// works. It's not software designed for people. It's software
+        /// designed for fucking shareholders. So, as a result of these trying
+        /// circumstances, I am going to create a bullshit container class that
+        /// cartoonishly positions itself offscreen so as to sidestep all of
+        /// the bullshit created by this godawful library in this equally
+        /// godawful engine.
+        ///</summary>
+        class HideableObject
+        {
+            public readonly GameObject gameObject;
+            public readonly RectTransform transform;
+
+            static Vector3 off = new(-10000, 0, 0);
+            static Vector3 on = new(0, 0, 0);
+
+            public void SetVisible(bool visible)
+            {
+                transform.localPosition = visible ? on : off;
+            }
+
+            public HideableObject(Transform parent)
+            {
+                gameObject = new("Hideable");
+                transform = Helpers.CreatePaddedTransform(gameObject);
+                transform.SetParent(parent, false);
             }
         }
 
@@ -82,47 +199,15 @@ namespace CoDArchipelago.Messaging
 
             Transform parent = GameScene.FindInScene("Rendering", "Canvas");
 
-            gameObject = new("AP Log");
-            gameObject.transform.SetParent(parent, false);
-            // container.transform.SetSiblingIndex(parent.GetComponentInChildren<Menu>(true).transform.GetSiblingIndex());
+            masterContainer = new("AP Log");
+            masterContainer.transform.SetParent(parent, false);
+            var masterTransform = Helpers.CreatePaddedTransform(masterContainer);
 
-            var tr = gameObject.AddComponent<RectTransform>();
-            tr.pivot = new(0, 0);
-            tr.anchorMin = new(0, 0);
-            tr.anchorMax = new(1, 1);
+            textHideable = new(masterTransform);
+            textContainer = new TextContainer(textHideable.transform);
 
-            GameObject viewport = new("Viewport");
-            viewport.transform.SetParent(gameObject.transform, false);
-            // viewport.AddComponent<RectMask2D>();
-            
-            RectTransform viewport_rt = viewport.AddComponent<RectTransform>();
-            viewport_rt.pivot = new(0, 0);
-            viewport_rt.anchorMax = new(1, 1);
-            viewport_rt.anchorMin = new(0, 0);
-
-            GameObject content = new("Content");
-            content.transform.SetParent(viewport.transform, false);
-
-            content.transform.localPosition = new(0, 0);
-
-            textContainer = new("Text");
-            textContainer.transform.SetParent(content.transform, false);
-
-            var t_tr = textContainer.AddComponent<RectTransform>();
-            t_tr.anchorMax = new(1, 0);
-            t_tr.anchorMin = new(0, 0);
-            t_tr.anchoredPosition = new(0, 15f);
-            t_tr.pivot = new(0, 0);
-            t_tr.sizeDelta = new(200, 500);
-
-            scrollRect = viewport.AddComponent<ScrollRect>();
-            scrollRect.viewport = viewport_rt;
-            scrollRect.content = t_tr;
-
-            var vlg = textContainer.AddComponent<VerticalLayoutGroup>();
-            vlg.childForceExpandHeight = false;
-            vlg.childForceExpandWidth = false;
-            vlg.childAlignment = TextAnchor.LowerLeft;
+            timedTextHideable = new(masterTransform);
+            timedTextContainer = new TimedTextContainer(timedTextHideable.transform);
         }
     }
 }

@@ -8,6 +8,15 @@ namespace CoDArchipelago.Cutscenes
 {
     class Collecting : InstantiateOnGameSceneLoad
     {
+        // this is kinda cool so i will keep it as a comment
+        //
+        // private Dictionary<string, T> GetUniquelyFlagged<T>()
+        //     where T: Component
+        // {
+        //     Access.Field<T, string> flagGetter = new("flag");
+        //     return GameScene.GetComponentsInChildren<T>(true).GroupBy(flagGetter.Get).ToDictionary(group => group.Key, group => group.First());
+        // }
+
         public Collecting()
         {
             locationCutscenes.Clear();
@@ -15,6 +24,18 @@ namespace CoDArchipelago.Cutscenes
             var cutscenes        = GameScene.GetComponentsInChildren<Cutscene>(true)             .GroupBy(x => x.flag).ToDictionary(group => group.Key, group => group.First());
             var timedSwitches    = GameScene.GetComponentsInChildren<TimedSwitch>(true)          .GroupBy(x => x.flag).ToDictionary(group => group.Key, group => group.First());
             var cutsceneSwitches = GameScene.GetComponentsInChildren<GenericCutsceneSwitch>(true).GroupBy(x => x.flag).ToDictionary(group => group.Key, group => group.First());
+
+            // for debug purposes
+            //
+            // foreach (var flag in cutscenes.Keys.Except(Data.eventItems.Keys)) {
+            //     Debug.LogWarning((flag, cutscenes[flag]));
+            // }
+            // foreach (var flag in timedSwitches.Keys.Except(Data.eventItems.Keys)) {
+            //     Debug.LogWarning((flag, timedSwitches[flag]));
+            // }
+            // foreach (var flag in cutsceneSwitches.Keys.Except(Data.eventItems.Keys)) {
+            //     Debug.LogWarning((flag, cutsceneSwitches[flag]));
+            // }
 
             foreach (var flagName in Data.eventItems.Keys) {
                 if (flagName == "PALACE_MELTED_ICE") continue;

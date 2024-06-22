@@ -1,13 +1,9 @@
-using System.Text.RegularExpressions;
-using System.Reflection;
-using HarmonyLib;
 using UnityEngine;
 using System.Collections.Generic;
 using System;
 using CoDArchipelago.Collecting;
 using CoDArchipelago.GlobalGameScene;
 using CoDArchipelago.FlagCache;
-using System.Threading.Tasks;
 
 namespace CoDArchipelago
 {
@@ -65,18 +61,18 @@ namespace CoDArchipelago
                     }
                 };
             }
-            
+
             static void InitializePortal(Transform portal, string flag, bool withDestination = false)
             {
                 portal.GetComponent<TwoState>().flag = flag;
                 Transform modelHolder = portal.Find("PortalModelHolder");
                 modelHolder.GetComponent<TwoState>().flag = flag;
-                
+
                 if (withDestination) {
                     InitializePortal(portal.GetComponent<WarpTrigger>().destination.transform.parent, flag, false);
                 }
             }
-            
+
             static void ShowPortal(Transform portal)
             {
                 portal.gameObject.SetActive(true);
@@ -89,7 +85,7 @@ namespace CoDArchipelago
                 var fellas = GameScene.FindInScene("CAVE", "Sun Cavern (Main)/Fellas");
                 foreach ((string nestName, string teleportFlag) in fellaNestTeleportMap) {
                     var nestPortal = fellas.Find(nestName + "/Portal");
-                    
+
                     InitializePortal(nestPortal, teleportFlag, withDestination: true);
 
                     MyItem.RegisterTrigger(teleportFlag, ActivatePortalFactory(nestPortal));

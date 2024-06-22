@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using CoDArchipelago.GlobalGameScene;
 
-namespace CoDArchipelago
+namespace CoDArchipelago.MiscPatches
 {
     class RemoveCutsceneTriggers : InstantiateOnGameSceneLoad
     {

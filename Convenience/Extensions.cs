@@ -2,10 +2,8 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using UnityEngine;
-using UnityEngine.InputSystem.EnhancedTouch;
 using UnityEngine.Localization;
 using UnityEngine.Localization.Settings;
-using UnityEngine.Localization.Tables;
 
 namespace CoDArchipelago
 {

@@ -1,7 +1,5 @@
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using UnityEngine;
-using HarmonyLib;
 using System;
 using CoDArchipelago.Collecting;
 using CoDArchipelago.GlobalGameScene;
@@ -19,7 +17,7 @@ namespace CoDArchipelago.VisualPatches
                     .GetTypes()
                     .Where(type => !type.IsAbstract && type.IsSubclassOf(typeof(ObjectPatcher)))
                     .ToDictionary(
-                        type => (Replaces)type.GetField("replaces", BindingFlags.Public | BindingFlags.Static).GetValue(null),
+                        type => (Replaces)type.GetField(nameof(ObjectPatcher.replaces), BindingFlags.Public | BindingFlags.Static).GetValue(null),
                         type => type.GetConstructor(new Type[] {})
                     );
 
@@ -75,7 +73,7 @@ namespace CoDArchipelago.VisualPatches
                 if (!replacementObjectsByGame.TryGetValue(gameName, out var game)) return false;
                 return game.TryGetValue(itemName, out obj);
             }
-            
+
             static ObjectPatcher GetGameObject(Collecting.Item item)
             {
                 if (
@@ -86,7 +84,7 @@ namespace CoDArchipelago.VisualPatches
                 }
                 return replacementObjectsByType[item.type];
             }
-            
+
             public static void ReplaceObject(GameObject obj, Collecting.Item item)
             {
                 GetGameObject(item).Replace(obj, item);
@@ -97,7 +95,7 @@ namespace CoDArchipelago.VisualPatches
                 GetGameObject(item).CollectJingle();
             }
         }
-        
+
         public static void CollectJingle(Collecting.Item item) =>
             ReplacementObjects.CollectJingle(item);
 

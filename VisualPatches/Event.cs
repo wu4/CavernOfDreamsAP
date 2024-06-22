@@ -11,12 +11,12 @@ namespace CoDArchipelago.VisualPatches
 {
     class Event : ObjectPatcher
     {
-        public static new Replaces replaces = new(APCollectibleType.Event);
+        public static readonly new Replaces replaces = new(APCollectibleType.Event);
 
         readonly Dictionary<string, Sprite> eventSprites;
 
         static readonly Regex eventWorldRegex = new("^([A-Z]+)_");
-        
+
         readonly GameObject eventObj;
 
         static readonly Dictionary<string, string> eventWorldMap = new(){
@@ -41,7 +41,7 @@ namespace CoDArchipelago.VisualPatches
 
             GameObject obj = ReplaceWith(toReplace, eventObj);
             obj.GetComponentInChildren<SpriteRenderer>().sprite = eventSprites[worldName];
-            
+
             return obj;
         }
 
@@ -54,7 +54,7 @@ namespace CoDArchipelago.VisualPatches
         {
             eventObj = GameObject.Instantiate(GameScene.FindInScene("CAVE", "Sun Cavern (Main)/Collectibles/Notes/NotePathLake/NoteCave").gameObject, Container);
             eventObj.name = "Event";
-            
+
             eventSprites = GetEventSprites();
         }
 
@@ -65,7 +65,7 @@ namespace CoDArchipelago.VisualPatches
             {"MONSTER", "Encyclopedia"},
             {"GALLERY", "Controls"}
         };
-        
+
         Dictionary<string, Sprite> GetEventSprites()
         {
             var pauseMenuT = GameScene.FindInScene("Rendering", "Canvas/PauseMenu/PauseMenuPage1");

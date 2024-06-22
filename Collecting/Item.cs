@@ -12,7 +12,7 @@ namespace CoDArchipelago.Collecting
         Event,
         Ability
     }
-    
+
     abstract class Item
     {
         public Enum type;
@@ -20,7 +20,7 @@ namespace CoDArchipelago.Collecting
         public abstract string GetFlag();
 
         public abstract void Collect();
-        
+
         /*
         public static void CollectJingle(Enum type)
         {

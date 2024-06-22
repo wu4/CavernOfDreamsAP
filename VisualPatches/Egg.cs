@@ -8,8 +8,8 @@ namespace CoDArchipelago.VisualPatches
 {
     class Egg : ObjectPatcher
     {
-        public static new Replaces replaces = new(CollectibleItem.CollectibleType.FELLA);
-        
+        public static readonly new Replaces replaces = new(CollectibleItem.CollectibleType.FELLA);
+
         public static Dictionary<string, Texture> eggTexturesByFlag;
         static GameObject egg;
 

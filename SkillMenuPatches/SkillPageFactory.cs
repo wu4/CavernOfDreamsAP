@@ -6,7 +6,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace CoDArchipelago
+namespace CoDArchipelago.SkillMenuPatches
 {
     class SkillPageFactory
     {

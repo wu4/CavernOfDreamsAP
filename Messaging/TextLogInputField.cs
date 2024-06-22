@@ -1,8 +1,4 @@
-using HarmonyLib;
-using Cinemachine;
-using UnityEngine.InputSystem;
 using UnityEngine;
-using System.Collections.Generic;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System;
@@ -18,13 +14,13 @@ namespace CoDArchipelago.Messaging
             GameObject container = new("Input Field Container");
             container.transform.SetParent(parent, false);
 
-            RectTransform rectTransform = container.AddComponent<RectTransform>();
-            rectTransform.pivot = new(0, 0);
-            rectTransform.anchorMin = new(0, 0);
-            rectTransform.anchorMax = new(0, 0);
-            rectTransform.sizeDelta = new(300f, 15f);
+            RectTransform rectTransform = Helpers.CreatePaddedTransform(
+                container,
+                anchorMax: new(0.5f, 0),
+                anchorMin: new(0, -0.1f),
+                topLeftPadding: new(0, -15)
+            );
 
-            /* Create game objects for sub components. */
             GameObject inputViewport = new("Input Viewport");
             inputViewport.transform.SetParent(container.transform, false);
             GameObject inputPlaceholderContainer = new("Input Placeholder");
@@ -32,12 +28,10 @@ namespace CoDArchipelago.Messaging
             GameObject inputTextComponent = new("Input Text");
             inputTextComponent.transform.SetParent(inputViewport.transform, false);
 
-            /*
-            var image = gameObject.AddComponent<Image>();
-            image.sprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/InputFieldBackground.psd");
-            image.type = Image.Type.Sliced;
-            image.color = Color.blue;
-            */
+            // var image = gameObject.AddComponent<Image>();
+            // image.sprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/InputFieldBackground.psd");
+            // image.type = Image.Type.Sliced;
+            // image.color = Color.blue;
 
             TextLogInputField inputField = container.AddComponent<TextLogInputField>();
             // var callbackHandler = container.AddComponent<CallbackEventHandler>();
@@ -50,13 +44,7 @@ namespace CoDArchipelago.Messaging
 
             inputViewport.AddComponent<RectMask2D>();
 
-            var viewportRectTransform = inputViewport.GetComponent<RectTransform>();
-            viewportRectTransform.anchorMin = Vector2.zero;
-            viewportRectTransform.anchorMax = Vector2.one;
-            viewportRectTransform.sizeDelta = Vector2.zero;
-            viewportRectTransform.offsetMin = Vector2.zero;
-            viewportRectTransform.offsetMax = Vector2.one;
-            //UITools.SetTransformValues(viewportRectTransform, 0, 0, 0, 0);
+            Helpers.CreatePaddedTransform(inputViewport);
 
             Text inputText = inputTextComponent.AddComponent<Text>();
             // inputText.text = "";
@@ -78,24 +66,13 @@ namespace CoDArchipelago.Messaging
             // inputPlaceholderUGUI.enableWordWrapping = false;
             // inputPlaceholderUGUI.extraPadding = true;
 
-            // Make placeholder color half as opaque as normal text color.
             inputPlaceholder.color = inputText.color with {
                 a = inputText.color.a * 0.5f
             };
 
-            var textRectTransform = inputTextComponent.GetComponent<RectTransform>();
-            textRectTransform.anchorMin = Vector2.zero;
-            textRectTransform.anchorMax = Vector2.one;
-            textRectTransform.sizeDelta = Vector2.zero;
-            textRectTransform.offsetMin = Vector2.zero;
-            textRectTransform.offsetMax = Vector2.zero;
+            Helpers.CreatePaddedTransform(inputTextComponent);
 
-            var placeholderRectTransform = inputPlaceholderContainer.GetComponent<RectTransform>();
-            placeholderRectTransform.anchorMin = Vector2.zero;
-            placeholderRectTransform.anchorMax = Vector2.one;
-            placeholderRectTransform.sizeDelta = Vector2.zero;
-            placeholderRectTransform.offsetMin = Vector2.zero;
-            placeholderRectTransform.offsetMax = Vector2.zero;
+            Helpers.CreatePaddedTransform(inputPlaceholderContainer);
 
             //inputField.textViewport = viewportRectTransform;
             inputField.textComponent = inputText;
@@ -117,7 +94,7 @@ namespace CoDArchipelago.Messaging
         public override void OnUpdateSelected(BaseEventData eventData)
         {
             if (!isFocused) return;
-            
+
             UnityEngine.Event tmpProcessingEvent = processingEvent.Get(this);
 
             bool flag = false;

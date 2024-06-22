@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Reflection.Emit;
 using HarmonyLib;
 using UnityEngine;
-using static CoDArchipelago.CodeMatchHelpers;
+using static CoDArchipelago.CodeGenerationHelpers;
 
 namespace CoDArchipelago.SkillPatches
 {
@@ -39,10 +39,10 @@ namespace CoDArchipelago.SkillPatches
                     Label onFalse = generator.DefineLabel();
 
                     matcher.InsertAndAdvance(
-                        new(OpCodes.Ldarg_0), CodeInstruction.Call(typeof(AnimationPatch), nameof(ShouldShowDoubleJumpFlipAnim)), new(OpCodes.Brfalse, onFalse),
+                        new(OpCodes.Ldarg_0), Call(typeof(AnimationPatch), nameof(ShouldShowDoubleJumpFlipAnim)), new(OpCodes.Brfalse, onFalse),
                         new(OpCodes.Ldstr, "JumpSomersault"), new(OpCodes.Stloc_0),
                         new(OpCodes.Br, onTrue),
-                        new CodeInstruction(OpCodes.Ldarg_0).WithLabels(onFalse), CodeInstruction.Call(typeof(AnimationPatch), nameof(ShouldShowDoubleJumpAnim)), new(OpCodes.Brfalse, onFalse2),
+                        new CodeInstruction(OpCodes.Ldarg_0).WithLabels(onFalse), Call(typeof(AnimationPatch), nameof(ShouldShowDoubleJumpAnim)), new(OpCodes.Brfalse, onFalse2),
                         new(OpCodes.Ldstr, "FlyUpWeakLoop"), new(OpCodes.Stloc_0),
                         new(OpCodes.Br, onTrue)
                     );
@@ -56,7 +56,7 @@ namespace CoDArchipelago.SkillPatches
 
                     matcher.Insert(
                         // new(OpCodes.Ldstr, "DOUBLEJUMP"), CodeInstruction.Call(typeof(Skills), nameof(HasSkill)),
-                        CodeInstruction.LoadField(typeof(FlagCache.CachedSkillFlags), nameof (FlagCache.CachedSkillFlags.doubleJump)),
+                        CodeInstruction.LoadField(typeof(FlagCache.CachedSkillFlags), nameof(FlagCache.CachedSkillFlags.doubleJump)),
                         new(OpCodes.Or)
                     );
 
@@ -82,11 +82,11 @@ namespace CoDArchipelago.SkillPatches
                     matcher.ThrowIfInvalid("Finding HasHover");
 
                     matcher.Insert(
-                        CodeInstruction.LoadField(typeof(FlagCache.CachedSkillFlags), nameof(FlagCache.CachedSkillFlags.hover)),
+                        LoadField(typeof(FlagCache.CachedSkillFlags), nameof(FlagCache.CachedSkillFlags.hover)),
                         new(OpCodes.Not),
 
-                        CodeInstruction.LoadField(typeof(FlagCache.CachedSkillFlags), nameof(FlagCache.CachedSkillFlags.doubleJump)),
-                        CodeInstruction.LoadField(typeof(DoubleJump), nameof(DoubleJump.canDoubleJump)),
+                        LoadField(typeof(FlagCache.CachedSkillFlags), nameof(FlagCache.CachedSkillFlags.doubleJump)),
+                        LoadField(typeof(DoubleJump), nameof(DoubleJump.canDoubleJump)),
                         new(OpCodes.And),
 
                         new(OpCodes.And),
@@ -105,10 +105,10 @@ namespace CoDArchipelago.SkillPatches
                     matcher.ThrowIfInvalid("Finding HasFlight");
 
                     matcher.Insert(
-                        CodeInstruction.LoadField(typeof(FlagCache.CachedSkillFlags), nameof(FlagCache.CachedSkillFlags.doubleJump)),
+                        LoadField(typeof(FlagCache.CachedSkillFlags), nameof(FlagCache.CachedSkillFlags.doubleJump)),
                         new(OpCodes.Or),
-                        CodeInstruction.LoadField(typeof(DoubleJump), nameof(DoubleJump.doubleJumpStateTimer)), CodeInstruction.Call(typeof(Timer), "Active"),
-                        CodeInstruction.LoadField(typeof(FlagCache.CachedSkillFlags), nameof(FlagCache.CachedSkillFlags.hover)),
+                        LoadField(typeof(DoubleJump), nameof(DoubleJump.doubleJumpStateTimer)), Call<Timer>("Active"),
+                        LoadField(typeof(FlagCache.CachedSkillFlags), nameof(FlagCache.CachedSkillFlags.hover)),
                         new(OpCodes.Or),
                         new(OpCodes.And)
                     );
@@ -220,7 +220,7 @@ namespace CoDArchipelago.SkillPatches
 
                 matcher.Advance(1);
                 matcher.InsertAndAdvance(
-                    new(OpCodes.Ldarg_0), CodeInstruction.Call(typeof(DoubleJump), nameof(DoubleJump.UpdateDoubleJump))
+                    new(OpCodes.Ldarg_0), Call(typeof(DoubleJump), nameof(DoubleJump.UpdateDoubleJump))
                 );
 
                 matcher.MatchForward(
@@ -262,8 +262,8 @@ namespace CoDArchipelago.SkillPatches
                     ).Instruction.operand;
 
                 matcher.Insert(
-                    new CodeInstruction(OpCodes.Ldarg_0).WithLabels(start), CodeInstruction.Call(typeof(DoubleJump), nameof(CanDoubleJump)), new(OpCodes.Brfalse, onFalse),
-                    new(OpCodes.Ldarg_0), new(OpCodes.Ldarg_S, newVelocityArg), CodeInstruction.Call(typeof(DoubleJump), nameof(DoDoubleJump)), new(OpCodes.Starg_S, newVelocityArg),
+                    new CodeInstruction(OpCodes.Ldarg_0).WithLabels(start), Call(typeof(DoubleJump), nameof(CanDoubleJump)), new(OpCodes.Brfalse, onFalse),
+                    new(OpCodes.Ldarg_0), new(OpCodes.Ldarg_S, newVelocityArg), Call(typeof(DoubleJump), nameof(DoDoubleJump)), new(OpCodes.Starg_S, newVelocityArg),
                     new(OpCodes.Br, onTrue)
                 );
 

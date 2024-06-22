@@ -1,7 +1,7 @@
 using UnityEngine;
 using CoDArchipelago.GlobalGameScene;
 
-namespace CoDArchipelago
+namespace CoDArchipelago.MiscPatches
 {
     /// <summary>
     /// The Fish Food in the Bedroom has an unnecessary extra TwoState. This

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using CoDArchipelago.GlobalGameScene;
 using System;
 
-namespace CoDArchipelago
+namespace CoDArchipelago.LocationPatches
 {
     class FellaNestPatches : InstantiateOnGameSceneLoad
     {
@@ -28,10 +28,10 @@ namespace CoDArchipelago
 
                 Collecting.MyItem.RegisterTrigger(nest.hatchedFlag, ShowFellaFactory(hatchable));
                 string noMoreNotesDialogPath = hatchedObj.transform.Find("Cutscenes/NoMoreNotesCutscene/NoMoreNotesDialog").GetPath();
-                DialogPatches.RegisterDynamicDialogPatch(noMoreNotesDialogPath, NotEnoughNotesDialogFactory(nest.requirement));
+                MiscPatches.DialogPatches.RegisterDynamicDialogPatch(noMoreNotesDialogPath, NotEnoughNotesDialogFactory(nest.requirement));
             }
         }
-        
+
         static Action<bool> ShowFellaFactory(GameObject hatchable)
         {
             return randomized => {
@@ -42,7 +42,7 @@ namespace CoDArchipelago
                 hatchable.SetActive(true);
             };
         }
-        
+
         static Func<Dialog, string> NotEnoughNotesDialogFactory(int requirement)
         {
             return dialog => {
@@ -50,7 +50,7 @@ namespace CoDArchipelago
                 return "wew lad. seriously? you are gonna need " + remaining + " more shrooms for this bad boy to be full";
             };
         }
-        
+
         [HarmonyPatch(typeof(FellaHatched), nameof(FellaHatched.Interact))]
         static class InteractPatch
         {
@@ -93,7 +93,7 @@ namespace CoDArchipelago
                 return false;
             }
         }
-        
+
         [HarmonyPatch(typeof(FellaHatchable), "HandleWhack")]
         class SkipHatchCutscenePatch
         {
@@ -114,7 +114,7 @@ namespace CoDArchipelago
                 __instance.fh.Hatch();
 
                 GlobalHub.Instance.save.SetFlag(__instance.hatchCutscene.flag, true);
-                
+
                 GameObject.Destroy(__instance.gameObject);
 
                 __result = true;
@@ -128,7 +128,7 @@ namespace CoDArchipelago
             public readonly string hatchedFlag;
             public readonly string gratitudeFlag;
             public readonly int requirement;
-            
+
             public HatchableFellaInfo(string nestName, string hatchedFlag, string gratitudeFlag, int requirement) {
                 this.nestName = nestName;
                 this.hatchedFlag = hatchedFlag;

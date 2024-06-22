@@ -1,9 +1,6 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
-using System.Collections.Generic;
-using HarmonyLib;
-using CoDArchipelago.GlobalGameScene;
 
 namespace CoDArchipelago.WhackableLabels
 {
@@ -12,10 +9,10 @@ namespace CoDArchipelago.WhackableLabels
         TextMeshProUGUI textComponent;
         RectTransform innerRectTransform;
         VerticalLayoutGroup innerLayoutGroup;
-        
+
         Image bgComponent;
         readonly Timer timer = new(10f);
-        
+
         Renderer whackableRenderer;
         GameObject whackableObject;
 

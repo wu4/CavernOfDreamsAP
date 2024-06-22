@@ -1,10 +1,6 @@
-using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
 using HarmonyLib;
 using TMPro;
-using UnityEngine;
 using CoDArchipelago.GlobalGameScene;
 
 namespace CoDArchipelago
@@ -31,14 +27,14 @@ namespace CoDArchipelago
             (Sage.PROJECTILE_REQ, "LOCATION_SKILL_PROJECTILE"),
             (Sage.FLIGHT_REQ, "LOCATION_SKILL_FLIGHT"),
         };
-        
+
         [HarmonyPatch(typeof(Sage), nameof(Sage.HasSkill))]
         static class HasSkillPatch
         {
             static bool Prefix(ref bool __result)
             {
                 int eggs = EggCount();
-                
+
                 __result = requirements.Any(req => eggs >= req.EggCount && !HasFlag(req.FlagName));
 
                 return false;
@@ -59,7 +55,7 @@ namespace CoDArchipelago
                     GlobalHub.Instance.save.SetFlag(requirement.FlagName, true);
                     return false;
                 }
-                
+
                 GlobalHub.Instance.SetCutscene(
                     eggs >= Sage.FLIGHT_REQ
                         ? __instance.postFlight

@@ -6,7 +6,7 @@ namespace CoDArchipelago.VisualPatches
 {
     class APMinor : StaticObjectPatcher
     {
-        public static new Replaces replaces = new(APCollectibleType.Minor);
+        public static readonly new Replaces replaces = new(APCollectibleType.Minor);
 
         public override void CollectJingle()
         {

@@ -1,11 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using HarmonyLib;
-using UnityEngine;
-using UnityEngine.Localization.SmartFormat.Utilities;
 
 namespace CoDArchipelago.FlagCache
 {
@@ -20,12 +17,12 @@ namespace CoDArchipelago.FlagCache
             this.flagName = flagName;
         }
     }
-    
+
     public static class CachedSkillFlags
     {
         [LoadsFromFlag("SKILL", "ATTACK")]
         public static bool attack = false;
-        
+
         [LoadsFromFlag("SKILL", "GROUNDATTACK")]
         public static bool groundAttack = false;
 
@@ -73,7 +70,7 @@ namespace CoDArchipelago.FlagCache
         [LoadsFromFlag("LOCATION", "PALACE_MELTED_ICE")]
         public static bool locationPalaceMeltedIce = false;
     }
-    
+
     public static class CachedAPFlags
     {
         [LoadsFromFlag("AP", "SPLIT_GRATITUDE_AND_TELEPORTS")]
@@ -81,7 +78,7 @@ namespace CoDArchipelago.FlagCache
         [LoadsFromFlag("AP", "SHUFFLE_GRATITUDE")]
         public static bool shuffleGratitude = false;
     }
-    
+
     public static class CachedTeleportFlags
     {
 
@@ -94,23 +91,19 @@ namespace CoDArchipelago.FlagCache
         [LoadsFromFlag("TELEPORT", "GALLERY")]
         public static bool gallery = false;
     }
-    
+
     class SetCachedFlags : InstantiateOnGameSceneLoad
     {
         static readonly Dictionary<string, Dictionary<string, FieldInfo>> cachedFlagFields =
-            /*
-            typeof(CachedSkillFlags)
-                .GetNestedTypes(BindingFlags.Public | BindingFlags.Static)
-                */
+            // typeof(CachedSkillFlags)
+            //     .GetNestedTypes(BindingFlags.Public | BindingFlags.Static)
             Enumerable.Empty<Type>()
             .Append(typeof(CachedSkillFlags))
             .Append(typeof(CachedOtherFlags))
             .Append(typeof(CachedAPFlags))
             .Append(typeof(CachedTeleportFlags))
-            /*
-            Assembly.GetExecutingAssembly()
-                .GetTypes()
-                */
+            // Assembly.GetExecutingAssembly()
+            //     .GetTypes()
 
                 .SelectMany(type => type.GetFields())
                 .Where(field => field.IsDefined(typeof(LoadsFromFlag), false))
@@ -122,7 +115,7 @@ namespace CoDArchipelago.FlagCache
                         field => field
                     )
                 );
-        
+
         static bool GetFlagOn(string flag_name) =>
             GlobalHub.Instance.save.GetFlag(flag_name).on;
 

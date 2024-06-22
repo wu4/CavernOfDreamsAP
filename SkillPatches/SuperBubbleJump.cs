@@ -1,11 +1,7 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
-using UnityEngine;
-using static CoDArchipelago.CodeMatchHelpers;
+using static CoDArchipelago.CodeGenerationHelpers;
 
 namespace CoDArchipelago.SkillPatches
 {
@@ -24,7 +20,7 @@ namespace CoDArchipelago.SkillPatches
                     Calls<Player>("InFirstPersonMode"),
                     new(OpCodes.Brtrue)
                 );
-                
+
                 matcher.Insert(
                     CodeInstruction.LoadField(typeof(FlagCache.CachedSkillFlags), nameof(FlagCache.CachedSkillFlags.superBubbleJump)),
                     new(OpCodes.Not),

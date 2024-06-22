@@ -3,7 +3,7 @@ using UnityEngine;
 using HarmonyLib;
 using UnityEngine.InputSystem;
 using System.Reflection.Emit;
-using static CoDArchipelago.CodeMatchHelpers;
+using static CoDArchipelago.CodeGenerationHelpers;
 
 namespace CoDArchipelago.Cutscenes
 {
@@ -70,7 +70,7 @@ namespace CoDArchipelago.Cutscenes
                     new(OpCodes.Ldarg_0),
                     Calls<GlobalHub>("CutsceneActive")
                 );
-                
+
                 matcher.Insert(
                     new(OpCodes.Ldarg_0), CodeInstruction.Call(typeof(UpdatePatch), nameof(UpdatePatch.UpdateCutscenes))
                 );

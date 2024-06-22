@@ -5,7 +5,7 @@ namespace CoDArchipelago.VisualPatches
 {
     class Card : StaticObjectPatcher
     {
-        public static new Replaces replaces = new(CollectibleItem.CollectibleType.CARD);
+        public static readonly new Replaces replaces = new(CollectibleItem.CollectibleType.CARD);
 
         public override void CollectJingle()
         {

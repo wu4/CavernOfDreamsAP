@@ -3,7 +3,7 @@ using HarmonyLib;
 using UnityEngine;
 using CoDArchipelago.GlobalGameScene;
 
-namespace CoDArchipelago
+namespace CoDArchipelago.MiscPatches
 {
     /// <summary>
     /// Checkpoints can potentially mess with accessibility in weird and

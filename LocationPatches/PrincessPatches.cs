@@ -1,7 +1,4 @@
-using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
 using HarmonyLib;
 using UnityEngine;
 using CoDArchipelago.GlobalGameScene;
@@ -14,10 +11,10 @@ namespace CoDArchipelago
         {
             PatchEggVisibility();
             PatchPrincessTint();
-            
+
             Collecting.Location.RegisterTrigger("LOCATION_PALACE_MELTED_ICE", UnfreezePrincess);
         }
-        
+
         static void UnfreezePrincess()
         {
             Transform princess = GameScene.FindInScene("PALACE", "Valley (Main)/NPCs/Princess");
@@ -27,7 +24,7 @@ namespace CoDArchipelago
 
             princess.GetComponent<Princess>().Whack(Whackable.WhackType.ATTACK, null);
         }
-        
+
         /// <summary>
         /// Update the tint component's flag
         /// </summary>
@@ -38,7 +35,7 @@ namespace CoDArchipelago
             var princessBody = area.Find("NPCs/Princess/princess2/Body");
             princessBody.GetComponent<TintChange>().flag = "LOCATION_PALACE_MELTED_ICE";
         }
-        
+
 
         /// <summary>
         /// Add the correct flags to the eggs such that they appear at the
@@ -53,7 +50,7 @@ namespace CoDArchipelago
                 cutscenes.Find("PrincessGiveItem" + i + "/ItemToToss").GetComponent<TwoStateExists>().flag = "ITEM_PRINCESS_" + i + "_GIVEN";
             }
         }
-        
+
         [HarmonyPatch(typeof(Princess), nameof(Princess.SetDefaultAnimation))]
         static class SetDefaultAnimationPatch
         {
@@ -65,7 +62,7 @@ namespace CoDArchipelago
                 return false;
             }
         }
-        
+
         [HarmonyPatch(typeof(Princess), "HandleWhack")]
         static class HandleWhackPatch
         {
@@ -81,7 +78,7 @@ namespace CoDArchipelago
                 return false;
             }
         }
-        
+
         [HarmonyPatch(typeof(Princess), nameof(Princess.Interact))]
         static class InteractPatch
         {
@@ -110,17 +107,17 @@ namespace CoDArchipelago
                     }
                     return false;
                 }
-                
+
                 if (Enumerable.Range(1, 3).Any(i => save.GetFlag("ITEM_PRINCESS_" + i + "_GIVEN").On())) {
                     GlobalHub.Instance.SetCutscene(__instance.speakFrozenIncomplete);
                     return false;
                 }
-                
+
                 GlobalHub.Instance.SetCutscene(__instance.speakFrozenRepeat);
-                
+
                 return false;
             }
-        
+
         }
     }
 }

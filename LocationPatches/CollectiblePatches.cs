@@ -2,7 +2,6 @@ using System.Text.RegularExpressions;
 using System.Reflection;
 using HarmonyLib;
 using UnityEngine;
-using System.Collections.Generic;
 using System;
 
 namespace CoDArchipelago
@@ -20,7 +19,7 @@ namespace CoDArchipelago
                 return CollectPatch.Prefix(__instance, ref __runOriginal);
             }
         }
-            
+
         [HarmonyPatch(typeof(Collectible), "Collect", new Type[] {})]
         public static class CollectPatch
         {
