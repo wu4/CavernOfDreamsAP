@@ -9,7 +9,7 @@ def serialize(item: FlagListIteration) -> list[str]:
     elif item.type == "LocationByName": type = "LocationsByName"
 
     name = f"{item.category}{type}" if item.category is not None else f"all{type}"
-    ret.append(f"public static readonly Dictionary<string,string> {name}=new()" "{")
+    ret.append(f"public static readonly Dictionary<string,string> {name}=new()" + "{")
 
     for k, v in item.flag_list.items():
         ret.append('{' + f'"{k}","{v}"' + '},')
@@ -32,5 +32,5 @@ if __name__ == "__main__":
     accum.append("}}")
 
     with open("Generated.cs", "w") as out_cs:
-        out_cs.write("\n".join(accum))
+        _ = out_cs.write("\n".join(accum))
     print("Done")
