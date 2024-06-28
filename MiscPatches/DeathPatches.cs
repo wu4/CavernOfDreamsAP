@@ -2,14 +2,14 @@ using System;
 using HarmonyLib;
 using UnityEngine;
 
-namespace CoDArchipelago
+namespace CoDArchipelago.MiscPatches
 {
     static class DeathPatches
     {
         enum WaterTeleportDeath {
             WATER = 0xdead
         };
-        
+
         public static void WaterTeleport(Player player)
         {
             player.Die((Kill.KillType)WaterTeleportDeath.WATER);
@@ -47,7 +47,7 @@ namespace CoDArchipelago
         //         return true;
         //     }
         // }
-        
+
         static readonly AccessTools.FieldRef<Player, GameObject> model = AccessTools.FieldRefAccess<Player, GameObject>("model");
 
         [HarmonyPatch(typeof(Player), "Die")]

@@ -21,7 +21,7 @@ namespace CoDArchipelago.SkillPatches
                         __instance.ReleaseCarryable(___model.transform.forward);
                     }
 
-                    DeathPatches.WaterTeleport(__instance);
+                    MiscPatches.DeathPatches.WaterTeleport(__instance);
                 }
             }
         }
