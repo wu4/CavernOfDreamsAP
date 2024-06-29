@@ -106,6 +106,9 @@ namespace CoDArchipelago.Cutscenes
                 }},
 
                 {"LAKE", new() {
+                    {"Lake (Main)/Cutscenes/GroveSuccess", new(
+                        WLOptions.None
+                    )},
                     {"Lake (Main)/Cutscenes/RaiseSwingsCutscene", new(
                         WLOptions.None,
                         "RaiseSwing",

@@ -4,7 +4,7 @@ using HarmonyLib;
 using UnityEngine;
 using System;
 
-namespace CoDArchipelago
+namespace CoDArchipelago.LocationPatches
 {
     static class CollectiblePatches
     {

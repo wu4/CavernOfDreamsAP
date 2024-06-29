@@ -85,10 +85,8 @@ namespace CoDArchipelago.VisualPatches
                 return replacementObjectsByType[item.type];
             }
 
-            public static void ReplaceObject(GameObject obj, Collecting.Item item)
-            {
-                GetGameObject(item).Replace(obj, item);
-            }
+            public static GameObject ReplaceObject(GameObject obj, Collecting.Item item)
+                => GetGameObject(item).Replace(obj, item);
 
             public static void CollectJingle(Collecting.Item item)
             {
@@ -109,9 +107,25 @@ namespace CoDArchipelago.VisualPatches
             if (!Location.checks.TryGetValue(ts.flag, out item))
                 item = new MyItem(ts.flag.Substring(9), randomized: false);
 
-            ReplacementObjects.ReplaceObject(obj, item);
+            GameObject newObj = ReplacementObjects.ReplaceObject(obj, item);
+            if (collectibleTriggers.TryGetValue(ts.flag, out Action<GameObject> action)) {
+                action(newObj);
+            }
         }
-        
+
+        static readonly Dictionary<string, Action<GameObject>> collectibleTriggers = new();
+        public static void RegisterTrigger(string locationFlag, Action<GameObject> action) =>
+            collectibleTriggers.Add(locationFlag, action);
+
+        class ResetCollectibleTriggers : InstantiateOnGameSceneLoad
+        {
+            [LoadOrder(Int32.MinValue)]
+            public ResetCollectibleTriggers()
+            {
+                collectibleTriggers.Clear();
+            }
+        }
+
         class PatchAllVisuals : InstantiateOnGameSceneLoad
         {
             public PatchAllVisuals()
@@ -135,40 +149,38 @@ namespace CoDArchipelago.VisualPatches
             }
         }
 
-        /*
-        [HarmonyPatch(typeof(Area), "Activate")]
-        static class PatchVisualsOnAreaLoad
-        {
-            static bool Prefix(Area __instance, ref bool __runOriginal)
-            {
-                if (!__runOriginal) return false;
+        // [HarmonyPatch(typeof(Area), "Activate")]
+        // static class PatchVisualsOnAreaLoad
+        // {
+        //     static bool Prefix(Area __instance, ref bool __runOriginal)
+        //     {
+        //         if (!__runOriginal) return false;
 
-                if (__instance.transform.Find("AlreadyPatched") != null) return true;
-            
-                var cols = __instance.GetComponentsInChildren<Collectible>(true);
+        //         if (__instance.transform.Find("AlreadyPatched") != null) return true;
+        //     
+        //         var cols = __instance.GetComponentsInChildren<Collectible>(true);
 
-                foreach (Collectible col in cols) {
-                    TwoState ts = col.GetComponent<TwoState>();
+        //         foreach (Collectible col in cols) {
+        //             TwoState ts = col.GetComponent<TwoState>();
 
-                    // Gallery lobby contains a fake egg. Its associated
-                    // cutscene is skipped, so we never see the egg anyways
-                    if (ts.flag == "GALLERY_TRAPDOOR_ACTIVE") {
-                        GameObject.Destroy(col.gameObject);
-                        continue;
-                    }
+        //             // Gallery lobby contains a fake egg. Its associated
+        //             // cutscene is skipped, so we never see the egg anyways
+        //             if (ts.flag == "GALLERY_TRAPDOOR_ACTIVE") {
+        //                 GameObject.Destroy(col.gameObject);
+        //                 continue;
+        //             }
 
-                    ts.flag = "LOCATION_" + ts.flag;
+        //             ts.flag = "LOCATION_" + ts.flag;
 
-                    PatchCollectible(col);
-                }
+        //             PatchCollectible(col);
+        //         }
 
-                GameObject g = new();
-                g.name = "AlreadyPatched";
-                g.transform.parent = __instance.transform;
+        //         GameObject g = new();
+        //         g.name = "AlreadyPatched";
+        //         g.transform.parent = __instance.transform;
 
-                return true;
-            }
-        }
-        */
+        //         return true;
+        //     }
+        // }
     }
 }
