@@ -27,15 +27,6 @@ namespace CoDArchipelago.MiscPatches
             }
         }
 
-        [HarmonyPatch(typeof(GlobalHub), "CanPause")]
-        static class PausePatch
-        {
-            static bool Prefix(ref bool __result) {
-                __result = true;
-                return false;
-            }
-        }
-
         // [HarmonyPatch(typeof(GlobalHub), "PlayerCanAct")]
         // static class DiePatch2
         // {
