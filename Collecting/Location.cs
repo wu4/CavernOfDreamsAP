@@ -23,6 +23,8 @@ namespace CoDArchipelago.Collecting
             {"LOCATION_NOTE_CAVE46",                 new MyItem("TELEPORT_LAKE")},
             // {"LOCATION_NOTE_CAVE2",                  new ClientItem("FELLA_LAKE1")},
             {"LOCATION_SKILL_ATTACK",                new MyItem("ITEM_FISH_FOOD")},
+            {"LOCATION_NOTE_LAKE7",                  new MyItem("LAKE_GROVE_HELPED")},
+            {"LOCATION_LAKE_GROVE_HELPED",           new MyItem("SKILL_AIRATTACK")},
             {"LOCATION_NOTE_CAVE9",                  new TheirItem(0, "lad", true)},
             {"LOCATION_NOTE_CAVE10",                 new TheirItem(0, "woah", false)},
             {"LOCATION_NOTE_CAVE3",                  new MyItem("GRATITUDE2")},

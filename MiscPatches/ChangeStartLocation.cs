@@ -47,13 +47,13 @@ namespace CoDArchipelago.MiscPatches
                 location.transform.rotation = rotation;
                 location.AddComponent<Destination>();
             }
-            
+
             public void SetAsStart()
             {
                 SetStartLocation(area, location, startCamInFront);
             }
         }
-        
+
         class StartLocations : InstantiateOnGameSceneLoad
         {
             public StartLocations()
@@ -67,14 +67,14 @@ namespace CoDArchipelago.MiscPatches
             }
 
             static Dictionary<string, StartLocation> startLocations;
-            
+
             public static StartLocation Get(string locationName) =>
                 startLocations[locationName];
         }
 
         static MO_DEBUG_WARP startWarpMenuOption;
         static bool isStartCamInFront = false;
-        
+
         static class GlobalHubFields
         {
             public static readonly AccessTools.FieldRef<GlobalHub, Area> areaCurrent = AccessTools.FieldRefAccess<GlobalHub, Area>("areaCurrent");
@@ -82,7 +82,7 @@ namespace CoDArchipelago.MiscPatches
             public static readonly AccessTools.FieldRef<GlobalHub, Transform> lastDest = AccessTools.FieldRefAccess<GlobalHub, Transform>("lastDest");
             public static readonly AccessTools.FieldRef<GlobalHub, World> world = AccessTools.FieldRefAccess<GlobalHub, World>("world");
         }
-        
+
         public static void SetStartLocation(string startLocationName)
         {
             StartLocations.Get(startLocationName).SetAsStart();
@@ -93,25 +93,25 @@ namespace CoDArchipelago.MiscPatches
             // var a = CreateNewStart("CAVE", "Palace Lobby", "DestFromDepthsToPalaceLobby");
             // var a = CreateNewStart("PALACE", "Valley (Main)", "DestFromPalaceLobbyToValley");
             // var a = CreateNewStart("CAVE", "Sun Cavern (Main)", "DestFromMonsterLobbyToCave");
-            
+
             Area area = GameScene.FindInScene(worldName, areaName).GetComponent<Area>();
             Destination dest = area.transform.Find(warpName).GetComponent<Destination>();
             GameObject startLocationObj = area.transform.Find(warpName + "/warp_destination").gameObject;
-            
+
             try {
                 WarpTrigger entryTrigger =
                     GameScene
                     .GetComponentsInChildren<WarpTrigger>(true)
                     .First(t => t.destination == dest);
-                
+
                 isStartCamInFront = entryTrigger.camInFront;
             } catch (System.InvalidOperationException) {
                 isStartCamInFront = false;
             }
-            
+
             SetStartLocation(area, startLocationObj, isStartCamInFront);
         }
-        
+
         static void SetStartLocation(Area area, GameObject startLocationObj, bool camInFront)
         {
             isStartCamInFront = camInFront;
@@ -127,8 +127,8 @@ namespace CoDArchipelago.MiscPatches
             startWarpMenuOption.area = area;
             startWarpMenuOption.origin = startLocationObj.transform;
         }
-        
-        
+
+
         [HarmonyPatch(typeof(MO_DEBUG_WARP), "OnSelect")]
         static class Patch
         {
