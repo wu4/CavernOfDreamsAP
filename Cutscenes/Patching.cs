@@ -46,9 +46,17 @@ namespace CoDArchipelago.Cutscenes
             }
 
             static readonly Dictionary<string, Dictionary<string, WhitelistEntry>> cutsceneWhitelists = new() {
+                {"CHALICE", new() {
+                    {"Chalice (Main)/Cutscenes/Bridge Activate Cutscene", new(
+                        WLOptions.None,
+                        "Awaken Bridge",
+                        "Snake Upper Jaw",
+                        "Activate Bridge"
+                    )}
+                }},
                 {"CAVE", new() {
                     {"Sun Cavern (Main)/Cutscenes/Misc Cutscenes/Nurikabe Fall Cutscene", new(
-                        WLOptions.None, 
+                        WLOptions.None,
                         "NurikabeFallOver",
                         "CreateDustFX",
                         "PlayLandFX",
