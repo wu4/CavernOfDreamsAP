@@ -163,6 +163,13 @@ namespace CoDArchipelago.Cutscenes
 
                 {"PALACE", new() {
                     // {"Valley (Main)/Cutscenes/PALACE_MELTED_ICE", new(WLOptions.MakeFast)},
+                    {"Observatory/Cutscenes/TelescopeSuccessCutscene", new(
+                        WLOptions.None,
+                        "AwakenConstellationLines",
+                        "ActivateConstellationLines",
+                        "ScreenShake",
+                        "PlayRoarSFX"
+                    )},
                     {"Valley (Main)/Cutscenes/PALACE_MORAY_AWAKE", new(WLOptions.MakeFast)},
                     {"Valley (Main)/Cutscenes/PALACE_LAKE_GATE_OPEN", new(
                         WLOptions.None,
