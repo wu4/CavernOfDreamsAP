@@ -43,13 +43,11 @@ namespace CoDArchipelago
                 "PlayCreakHingeSFX"
             )},
             {"Monster/Rotate (Inside Monster)/Cutscenes/HeartGateOpenCutscene", new(
-                Cutscenes.WLOptions.MakeFast,
-                "OpenHeartGate"
+                Cutscenes.WLOptions.MakeFast
             )},
             {"Monster/Rotate (Inside Monster)/Cutscenes/HeartGateCloseCutscene", new(
                 Cutscenes.WLOptions.MakeFast,
-                "PlayFailureSFX",
-                "CloseHeartGate"
+                "PlayFailureSFX"
             )},
             {"Monster/Rotate (Inside Monster)/Cutscenes/OpenTestChubesCutscene", new(
                 Cutscenes.WLOptions.None,
