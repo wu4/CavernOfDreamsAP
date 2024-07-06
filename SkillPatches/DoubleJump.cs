@@ -154,6 +154,7 @@ namespace CoDArchipelago.SkillPatches
                 p.IsGrounded()
                 || p.IsPaddling()
                 || p.IsUnderwater()
+                || p.IsClimbing()
             ) {
                 canDoubleJump = true;
                 doubleJumpStateTimer.End();

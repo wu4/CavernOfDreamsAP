@@ -12,6 +12,7 @@ namespace CoDArchipelago
         public static bool IsJumpHeld(this Player player) => Methods.IsJumpHeld.Invoke(player);
         public static bool IsRollHeld(this Player player) => Methods.IsRollHeld.Invoke(player);
         public static bool IsSitting(this Player player) => Methods.IsSitting.Invoke(player);
+        public static bool IsClimbing(this Player player) => Methods.IsClimbing.Invoke(player);
 
         static class Methods
         {
@@ -20,8 +21,9 @@ namespace CoDArchipelago
             public static readonly Access.Method<Player, bool> IsJumpHeld = new("IsJumpHeld");
             public static readonly Access.Method<Player, bool> IsRollHeld = new("IsRollHeld");
             public static readonly Access.Method<Player, bool> IsSitting = new("IsSitting");
+            public static readonly Access.Method<Player, bool> IsClimbing = new("IsClimbing");
         }
-        
+
         public static class Fields
         {
             public static readonly Access.Field<Player, bool> bouncing = new("bouncing");
