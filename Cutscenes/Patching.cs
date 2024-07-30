@@ -18,6 +18,27 @@ namespace CoDArchipelago.Cutscenes
 
     static class Patching
     {
+        public static void MakeCutsceneFast(Cutscene cutscene)
+        {
+            cutscene.interrupt = false;
+
+            cutscene.durationAfterFinal = 1;
+
+            for (int cursor = 0; cursor < cutscene.transform.childCount; cursor++) {
+                var child = cutscene.transform.GetChild(cursor);
+                if (
+                    child.TryGetComponent<CutsceneAudioEvent>(out var _)
+                 || child.TryGetComponent<CutsceneShakeEvent>(out var _)
+                 || child.TryGetComponent<CutsceneCamEvent>(out var _)
+                ) {
+                    GameObject.DestroyImmediate(child.gameObject);
+                    cursor--;
+                }
+            }
+
+            cutscene.GetComponentsInChildren<Event>(true).Do(WhitelistEntry.MakeEventFast);
+        }
+
         public static void PatchCutscene(Cutscene cutscene, WLOptions options, params string[] whitelist)
         {
             new WhitelistEntry(options, whitelist).PatchCutscene(cutscene);
@@ -179,6 +200,22 @@ namespace CoDArchipelago.Cutscenes
                         "PlayRoarSFX"
                     )},
                     {"Valley (Main)/Cutscenes/PALACE_MORAY_AWAKE", new(WLOptions.MakeFast)},
+                    {"Valley (Main)/Cutscenes/PALACE_MORAY_FED", new(
+                        WLOptions.MakeFast,
+                        "PlaySinkSFX",
+                        "AwakenMorayFed",
+                        "HideMorayHungry"
+                    )},
+                    {"Valley (Main)/Cutscenes/PALACE_ICE_WALL_MORAY_REMOVED", new(
+                        WLOptions.None,
+                        "MeltIceWallMoray",
+                        "MeltCutsceneSFX"
+                    )},
+                    {"Valley (Main)/Cutscenes/PALACE_ICE_WALL_STARFISH_REMOVED", new(
+                        WLOptions.None,
+                        "MeltIceWallStarfish",
+                        "MeltCutsceneSFX"
+                    )},
                     {"Valley (Main)/Cutscenes/PALACE_LAKE_GATE_OPEN", new(
                         WLOptions.None,
                         "LakeFenceOpen"
@@ -249,6 +286,17 @@ namespace CoDArchipelago.Cutscenes
                 // {"PALACE/Valley (Main)/Cutscenes/PALACE_MELTED_ICE", (false, true, new int[7]{8, 11, 12, 13, 14, 15, 16})},
 
                 {"GALLERY", new() {
+                    {"Foyer (Main)/Cutscenes/SagePaintingSuccess", new(
+                        WLOptions.None,
+                        "OpenEarthLobby",
+                        "OpenFireLobby"
+                    )},
+                    {"Foyer (Main)/Objects/Matroyshka/DriftEgg4/DriftEggBreakCutscene", new(
+                        WLOptions.None,
+                        "AwakenSmallerEgg!!",
+                        "PlayGoodSFX"
+                    )},
+
                     {"Earth Lobby/Cutscenes/OpenMonsterShortcut", new(
                         WLOptions.None,
                         "RaiseMonsterBars",
@@ -263,16 +311,24 @@ namespace CoDArchipelago.Cutscenes
                         "FadeOutArtworkUnfinished",
                         "DestroyDragonSkullGem"
                     )},
-
-                    {"Foyer (Main)/Cutscenes/SagePaintingSuccess", new(
+                    {"Earth Lobby/Cutscenes/UndeadPaintingWet", new(
                         WLOptions.None,
-                        "OpenEarthLobby",
-                        "OpenFireLobby"
+                        "DryPaintingFadeOut"
                     )},
 
                     {"Fire Lobby/Cutscenes/MonsterPaintingSuccessCutscene", new(
                         WLOptions.None,
+                        "RaiseGateFella",
+                        "RaiseSFX"
+                    )},
+                    {"Fire Lobby/Cutscenes/HoopSuccessCutscene", new(
+                        WLOptions.None,
                         "FryingPansExtend",
+                        "RaiseSFX"
+                    )},
+                    {"Fire Lobby/Cutscenes/BridgeCutscene", new(
+                        WLOptions.None,
+                        "ExtendBridgeFella",
                         "RaiseSFX"
                     )},
 
@@ -281,16 +337,9 @@ namespace CoDArchipelago.Cutscenes
                         "FadeOutArtworkUnfinished",
                         "OpenChest"
                     )},
-
                     {"Water Lobby/Cutscenes/AngelStatueShadowsSuccess", new(
                         WLOptions.None,
                         "OpenChest"
-                    )},
-
-                    {"Water Lobby/Cutscenes/HealGiant", new(
-                        WLOptions.None,
-                        "HealGiantManual",
-                        "DestroyGiantBlockade"
                     )},
                 }},
             };

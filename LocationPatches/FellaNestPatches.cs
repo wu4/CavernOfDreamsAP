@@ -47,7 +47,7 @@ namespace CoDArchipelago.LocationPatches
         {
             return dialog => {
                 int remaining = requirement - GlobalHub.Instance.save.GetCollectible(Collectible.CollectibleType.NOTE);
-                return "wew lad. seriously? you are gonna need " + remaining + " more shrooms for this bad boy to be full";
+                return $"Hmm. It seems this fella needs {remaining} more shrooms!";
             };
         }
 

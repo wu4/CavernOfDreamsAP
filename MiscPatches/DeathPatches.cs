@@ -39,26 +39,80 @@ namespace CoDArchipelago.MiscPatches
         //     }
         // }
 
-        static readonly AccessTools.FieldRef<Player, GameObject> model = AccessTools.FieldRefAccess<Player, GameObject>("model");
+        static readonly Access.Field<Player, GameObject> model = new("model");
+        static readonly Access.Field<Player, CharacterController> cc = new("cc");
+
+        static SkinnedMeshRenderer GetPlayerRenderer(Player player) =>
+            model.Get(player).transform.Find("dragon/Main").GetComponent<SkinnedMeshRenderer>();
+
+        static void HideFynn(Player player)
+        {
+            model.Get(player).SetActive(false);
+            // player.gameObject.SetActive(false);
+            // model.Get(player).transform.localPosition = new(0, -1000, 0);
+            // GetPlayerRenderer(player).enabled = false;
+            // cc.Get(player).enabled = false;
+        }
+
+        static void ShowFynn(Player player)
+        {
+            model.Get(player).SetActive(true);
+            // player.gameObject.SetActive(true);
+            // player.enabled = true;
+            // GetPlayerRenderer(player).enabled = true;
+            // cc.Get(player).enabled = true;
+        }
 
         [HarmonyPatch(typeof(Player), "Die")]
         static class DiePatch
         {
-            static readonly AccessTools.FieldRef<GlobalHub, bool> warpIsDeath = AccessTools.FieldRefAccess<GlobalHub, bool>("warpIsDeath");
-            static readonly AccessTools.FieldRef<GlobalHub, Timer> warpTimer = AccessTools.FieldRefAccess<GlobalHub, Timer>("warpTimer");
+            static readonly Access.Field<GlobalHub, bool> warpIsDeath = new("warpIsDeath");
+            static readonly Access.Field<GlobalHub, Timer> warpTimer = new("warpTimer");
 
             static bool Prefix(Player __instance, Kill.KillType killType) {
-                if (warpIsDeath(GlobalHub.Instance) || isDying) return false;
+                if (warpIsDeath.Get(GlobalHub.Instance) || isDying) return false;
                 isDying = true;
                 if (killType == (Kill.KillType)WaterTeleportDeath.WATER) {
-                    model(__instance).SetActive(false);
+                    HideFynn(__instance);
                     waterVoid = true;
                     GlobalHub.Instance.Die();
-                    warpTimer(GlobalHub.Instance).Reset(60f);
+                    warpTimer.Get(GlobalHub.Instance).Reset(60f);
 
                     return false;
                 }
                 return true;
+            }
+        }
+
+        static class SinkOnTouchFix
+        {
+            static SinkOnTouch touch = null;
+
+            [HarmonyPatch(typeof(SinkOnTouch), "Touch")]
+            static class AddNewTouch
+            {
+                static bool Prefix(SinkOnTouch __instance)
+                {
+                    if (isDying) return false;
+                    touch = __instance;
+                    return true;
+                }
+            }
+
+            [HarmonyPatch(typeof(SinkOnTouch), "Leave")]
+            static class RemoveTouch
+            {
+                static bool Prefix(SinkOnTouch __instance)
+                {
+                    if (isDying) return false;
+                    touch = null;
+                    return true;
+                }
+            }
+
+            public static void Fix()
+            {
+                touch?.Leave();
             }
         }
 
@@ -67,10 +121,11 @@ namespace CoDArchipelago.MiscPatches
         {
             static void Postfix() {
                 if (waterVoid) {
-                    model(GlobalHub.Instance.player).SetActive(true);
+                    ShowFynn(GlobalHub.Instance.player);
                     waterVoid = false;
                 }
                 isDying = false;
+                SinkOnTouchFix.Fix();
             }
         }
     }

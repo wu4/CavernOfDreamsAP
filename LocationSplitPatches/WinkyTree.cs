@@ -3,15 +3,15 @@ using HarmonyLib;
 using UnityEngine;
 using CoDArchipelago.GlobalGameScene;
 
-namespace CoDArchipelago
+namespace CoDArchipelago.LocationSplitPatches
 {
     /// <summary>
     /// Change the Winky Tree's target behavior, making it always active.
     /// Instead, the target winks after the check has been cleared
     /// </summary>
-    class WinkyTreePatches : InstantiateOnGameSceneLoad
+    class WinkyTree : InstantiateOnGameSceneLoad
     {
-        public WinkyTreePatches()
+        public WinkyTree()
         {
             MakeTargetUnbreakable();
             PatchSmile();

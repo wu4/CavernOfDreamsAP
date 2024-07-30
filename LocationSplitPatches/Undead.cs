@@ -1,11 +1,11 @@
 using UnityEngine;
 using CoDArchipelago.GlobalGameScene;
 
-namespace CoDArchipelago
+namespace CoDArchipelago.LocationSplitPatches
 {
-    class UndeadPatches : InstantiateOnGameSceneLoad
+    class Undead : InstantiateOnGameSceneLoad
     {
-        public UndeadPatches() {
+        public Undead() {
             var area = GameScene.FindInScene("UNDEAD", "Undead (Main)");
 
             spawner = area.Find("Objects/UndeadMonsterSpawner").GetComponent<UndeadMonsterSpawner>();
@@ -24,7 +24,7 @@ namespace CoDArchipelago
             foreach (Transform child in area.Find("Entities")) {
                 child.GetComponent<TwoState>().flag = LOCATION_FLAG;
             }
-            
+
             Collecting.Location.RegisterTrigger(LOCATION_FLAG, MakePeaceful);
         }
         readonly GameObject sandstorm;
@@ -34,19 +34,19 @@ namespace CoDArchipelago
         readonly GameObject natureFX;
 
         readonly UndeadMonsterSpawner spawner;
-        
+
         static readonly string LOCATION_FLAG = "LOCATION_FELLA_UNDEAD1";
 
         void MakePeaceful()
         {
             spawner.Activate();
-            
+
             sandstorm.SetActive(false);
             vileSky.SetActive(false);
             windFX.SetActive(false);
-            
+
             natureFX.SetActive(true);
-            
+
             GlobalHub.Instance.GetArea().Activate(false, true);
         }
     }

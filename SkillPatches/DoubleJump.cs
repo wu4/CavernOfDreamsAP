@@ -239,6 +239,7 @@ namespace CoDArchipelago.SkillPatches
                 Label start = generator.DefineLabel();
 
                 CodeInstruction code = matcher.Instruction;
+                // update all jumps to new label
                 while (!(code.opcode == OpCodes.Ldarg_0 && matcher.InstructionAt(1).Calls<Player>("IsClimbing"))) {
                     if (code.opcode == OpCodes.Brtrue || code.opcode == OpCodes.Brfalse) {
                         matcher.SetOperandAndAdvance(start);

@@ -3,11 +3,11 @@ using HarmonyLib;
 using UnityEngine;
 using CoDArchipelago.GlobalGameScene;
 
-namespace CoDArchipelago
+namespace CoDArchipelago.LocationSplitPatches
 {
-    class PrincessPatches : InstantiateOnGameSceneLoad
+    class PrincessFix : InstantiateOnGameSceneLoad
     {
-        public PrincessPatches()
+        public PrincessFix()
         {
             PatchEggVisibility();
             PatchPrincessTint();

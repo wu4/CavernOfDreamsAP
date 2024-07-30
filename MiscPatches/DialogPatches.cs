@@ -7,11 +7,10 @@ using static CoDArchipelago.CodeGenerationHelpers;
 
 namespace CoDArchipelago.MiscPatches
 {
-    // [InitOnGameLoad]
     static class DialogPatches
     {
         static readonly Dictionary<string, string> staticDialogPatches = new() {
-            {"/CAVE/Sun Cavern (Main)/Cutscenes/Sage Cutscenes/Sage Post Intro/SageDialog", "lad u cannot be srs"}
+            {"/LAKE/Lake (Main)/Cutscenes/KappaTalkProblemRepeat/KappaTalk", "O-oh dear, Fynn... I was so excited when you gave me the fish food that I lost it. Could you please get more?"},
         };
 
         class ResetDialogPatches : InstantiateOnGameSceneLoad

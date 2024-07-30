@@ -5,11 +5,11 @@ using CoDArchipelago.Collecting;
 using CoDArchipelago.GlobalGameScene;
 using CoDArchipelago.FlagCache;
 
-namespace CoDArchipelago
+namespace CoDArchipelago.LocationSplitPatches
 {
-    static class GratitudeTeleportPatches
+    static class GratitudeTeleports
     {
-        class LinkGratitudeWithTeleports : InstantiateOnGameSceneLoad
+        public static class LinkGratitudeWithTeleports
         {
             static readonly Dictionary<string, string> gratitudeTeleportFlagMap = new() {
                 {"GRATITUDE1", "TELEPORT_LAKE"},
@@ -23,7 +23,7 @@ namespace CoDArchipelago
             static void RegisterGratitudeTeleportLink(string gratitudeFlag, string teleportFlag) =>
                 MyItem.RegisterTrigger(gratitudeFlag, SetTeleportFlagFactory(teleportFlag));
 
-            public LinkGratitudeWithTeleports()
+            public static void Init()
             {
                 if (!CachedAPFlags.splitGratitudeAndTeleports) {
                     foreach ((string gratitudeFlag, string teleportFlag) in gratitudeTeleportFlagMap) {

@@ -1,29 +1,19 @@
 using System.Collections.Generic;
 using CoDArchipelago.GlobalGameScene;
-using HarmonyLib;
 using UnityEngine;
 
-namespace CoDArchipelago
+namespace CoDArchipelago.LocationPatches
 {
-    [HarmonyPatch(typeof(MonsterBoilListener), "RemoveBoil")]
-    static class MonsterBoilsPatch
-    {
-        static bool Prefix(MonsterBoilListener __instance, ref int ___numBoils)
-        {
-            ___numBoils--;
-            if (___numBoils == 0) {
-                StockSFX.Instance.jingleGood.Play();
-                GlobalHub.Instance.save.SetFlag("LOCATION_MONSTER_BOILS_REMOVED", true);
-                GameObject.Destroy(__instance.gameObject);
-            }
-
-            return false;
-        }
-    }
-
     class MonsterPatches : InstantiateOnGameSceneLoad
     {
-        static readonly string[] cutsceneTriggerPaths = new[] {
+        public MonsterPatches()
+        {
+            RemoveCutsceneTriggers();
+            RemoveMonsterEyeFlag();
+            Cutscenes.Patching.PatchCutsceneList("MONSTER", whitelists);
+        }
+
+        static readonly string[] cutsceneTriggersToDestroy = new[] {
             "Sky (Main)/Cutscenes/GoodbyeTrigger",
             "Sky (Main)/Cutscenes/EnableGoodbyeTrigger",
             "Sky (Main)/Cutscenes/HelloTrigger",
@@ -92,17 +82,10 @@ namespace CoDArchipelago
             )}
         };
 
-        public MonsterPatches()
-        {
-            RemoveCutsceneTriggers();
-            RemoveMonsterEyeFlag();
-            Cutscenes.Patching.PatchCutsceneList("MONSTER", whitelists);
-        }
-
         static void RemoveCutsceneTriggers()
         {
             Transform root = GameScene.GetRootObjectByName("MONSTER").transform;
-            foreach (string triggerPath in cutsceneTriggerPaths) {
+            foreach (string triggerPath in cutsceneTriggersToDestroy) {
                 GameObject.Destroy(root.Find(triggerPath).gameObject);
             }
         }

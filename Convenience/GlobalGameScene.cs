@@ -21,6 +21,14 @@ namespace CoDArchipelago.GlobalGameScene
         public static Transform FindInScene(string rootName, string path) =>
             GetRootObjectByName(rootName).transform.Find(path);
 
+        public static Transform FindInSceneFullPath(string fullPath)
+        {
+            var split = fullPath.Split('/');
+            string root = split[0];
+            string rest = string.Join("/", split.Skip(1));
+            return FindInScene(root, rest);
+        }
+
         public static IEnumerable<T> GetComponentsInChildren<T>(bool includeInactive = false) =>
             gameScene
                 .GetRootGameObjects()

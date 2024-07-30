@@ -8,6 +8,21 @@ namespace CoDArchipelago.Cutscenes
 {
     class Collecting : InstantiateOnGameSceneLoad
     {
+        [HarmonyPatch(typeof(Cutscene), "CheckIfAlreadyActivated")]
+        static class ChurchStatueListenerFix
+        {
+            static bool Prefix(Cutscene __instance, ref bool __result)
+            {
+                if (locationCutscenes.ContainsValue(__instance) && !__instance.flag.StartsWith("LOCATION_")) {
+                    __result = GlobalHub.Instance.save.GetFlag($"LOCATION_{__instance.flag}").on;
+                    return false;
+                }
+
+                return true;
+            }
+        }
+
+
         // this is kinda cool so i will keep it as a comment
         //
         // private Dictionary<string, T> GetUniquelyFlagged<T>()
@@ -69,9 +84,13 @@ namespace CoDArchipelago.Cutscenes
         /// </summary>
         /// <param name="cutsceneFlag">The name of the cutscene's flag.</param>
         /// <returns></returns>
-        public static bool TryCollect(string cutsceneFlag)
+        public static bool TryCollect(string cutsceneFlag, bool silent = false)
         {
             if (locationCutscenes.TryGetValue(cutsceneFlag, out Cutscene cutscene)) {
+                if (silent) {
+                    // destructively make the cutscene instant
+                    Patching.MakeCutsceneFast(cutscene);
+                }
                 MultipleCutscenes.Add(cutscene);
                 return true;
             }

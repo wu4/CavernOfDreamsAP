@@ -86,7 +86,13 @@ namespace CoDArchipelago.VisualPatches
             }
 
             public static GameObject ReplaceObject(GameObject obj, Collecting.Item item)
-                => GetGameObject(item).Replace(obj, item);
+            {
+                // if (item is Collecting.MyItem myItem) {
+                //     Debug.Log("placing item...");
+                //     Debug.Log($"...with flag {myItem.GetFlag()}");
+                // }
+                return GetGameObject(item).Replace(obj, item);
+            }
 
             public static void CollectJingle(Collecting.Item item)
             {
@@ -126,26 +132,23 @@ namespace CoDArchipelago.VisualPatches
             }
         }
 
-        class PatchAllVisuals : InstantiateOnGameSceneLoad
+        public static void PatchAllVisuals()
         {
-            public PatchAllVisuals()
-            {
-                var cols = GameScene.GetComponentsInChildren<Area>(true).SelectMany(area => area.GetComponentsInChildren<Collectible>(true));
+            var cols = GameScene.GetComponentsInChildren<Area>(true).SelectMany(area => area.GetComponentsInChildren<Collectible>(true));
 
-                foreach (Collectible col in cols) {
-                    TwoState ts = col.GetComponent<TwoState>();
+            foreach (Collectible col in cols) {
+                TwoState ts = col.GetComponent<TwoState>();
 
-                    // Gallery lobby contains a fake egg. Its associated
-                    // cutscene is skipped, so we never see the egg anyways
-                    if (ts.flag == "GALLERY_TRAPDOOR_ACTIVE") {
-                        GameObject.Destroy(col.gameObject);
-                        continue;
-                    }
-
-                    ts.flag = "LOCATION_" + ts.flag;
-
-                    PatchCollectible(col);
+                // Gallery lobby contains a fake egg. Its associated
+                // cutscene is skipped, so we never see the egg anyways
+                if (ts.flag == "GALLERY_TRAPDOOR_ACTIVE") {
+                    GameObject.Destroy(col.gameObject);
+                    continue;
                 }
+
+                ts.flag = "LOCATION_" + ts.flag;
+
+                PatchCollectible(col);
             }
         }
 

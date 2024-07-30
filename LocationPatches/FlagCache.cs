@@ -73,10 +73,7 @@ namespace CoDArchipelago.FlagCache
 
     public static class CachedAPFlags
     {
-        [LoadsFromFlag("AP", "SPLIT_GRATITUDE_AND_TELEPORTS")]
         public static bool splitGratitudeAndTeleports = false;
-        [LoadsFromFlag("AP", "SHUFFLE_GRATITUDE")]
-        public static bool shuffleGratitude = false;
     }
 
     public static class CachedTeleportFlags

@@ -10,7 +10,8 @@ namespace CoDArchipelago.VisualPatches
 
         public override void CollectJingle()
         {
-            throw new System.NotImplementedException();
+            StockSFX.Instance.jingleCollectLarge.Play();
+            GlobalHub.Instance.player.findSFX.Play();
         }
 
         public APMajor()

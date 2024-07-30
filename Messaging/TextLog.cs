@@ -16,16 +16,19 @@ namespace CoDArchipelago.Messaging
         readonly HideableObject timedTextHideable;
         readonly TextContainer textContainer;
         readonly TimedTextContainer timedTextContainer;
+        static Font defaultFont = Resources.GetBuiltinResource<Font>("Arial.ttf");
 
         class TextLogEntry
         {
             protected readonly GameObject gameObject;
-            protected readonly TextMeshProUGUI tmp;
+            protected readonly Text textCmp;
+            protected readonly Outline outlineCmp;
 
             public TextLogEntry(string text, Transform parent)
             {
                 gameObject = CreateLine(text, parent);
-                tmp = gameObject.GetComponent<TextMeshProUGUI>();
+                textCmp = gameObject.GetComponent<Text>();
+                outlineCmp = gameObject.GetComponent<Outline>();
             }
         }
 
@@ -44,7 +47,13 @@ namespace CoDArchipelago.Messaging
 
                 if (timespan.TotalSeconds < 4) return true;
 
-                tmp.alpha = 1f - ((float)(timespan.TotalMilliseconds - 4000) / 1000f);
+                // textCmp.CrossFadeAlpha(0, 0.1f, false);
+                textCmp.color = textCmp.color with {
+                    a = 1f - ((float)(timespan.TotalMilliseconds - 4000) / 1000f)
+                };
+                // float newAlpha = 1f - ((float)(timespan.TotalMilliseconds - 4000) / 1000f);
+                // textCmp.color = new(1, 1, 1, newAlpha);
+                // outlineCmp.effectColor = new(0, 0, 0, newAlpha);
 
                 if (timespan.TotalSeconds < 5) return true;
 
@@ -58,15 +67,20 @@ namespace CoDArchipelago.Messaging
 
         static GameObject CreateLine(string text, Transform parent)
         {
-            GameObject obj = new("Line");
+            GameObject obj = new(); //GameObject.Instantiate(referenceObject);
             obj.transform.SetParent(parent, false);
 
-            var tmp = obj.AddComponent<TextMeshProUGUI>();
-            tmp.alignment = TextAlignmentOptions.BottomLeft;
-            tmp.fontSizeMin = 14;
-            tmp.fontSize = 14;
-            tmp.autoSizeTextContainer = true;
-            tmp.SetText(text);
+            var textCmp = obj.AddComponent<Text>();
+            textCmp.supportRichText = true;
+            textCmp.alignment = TextAnchor.LowerLeft;
+            textCmp.fontSize = 14;
+            textCmp.text = text;
+            textCmp.font = defaultFont;
+
+            var outline = obj.AddComponent<Outline>();
+            outline.effectDistance = new(0.5f, -0.5f);
+            outline.effectColor = new(0, 0, 0, 1);
+            outline.useGraphicAlpha = true;
 
             return obj;
         }
@@ -208,6 +222,8 @@ namespace CoDArchipelago.Messaging
 
             timedTextHideable = new(masterTransform);
             timedTextContainer = new TimedTextContainer(timedTextHideable.transform);
+
+            textHideable.SetVisible(false);
         }
     }
 }

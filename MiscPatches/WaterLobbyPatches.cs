@@ -54,6 +54,11 @@ namespace CoDArchipelago.MiscPatches
 
             // entrance with the egg
             CreateBarPlatform(new(-24f, 28f, -0.025f), new(1f, 0.5f, 1f));
+
+            // entrance with the giant
+            CreateBarPlatform(new(32f, 28f, 3.975f));
+            CreateBarPlatform(new(24f, 28f, 3.975f));
+            CreateBarPlatform(new(16f, 28f, 3.975f));
         }
 
         public WaterLobbyPatches()

@@ -25,6 +25,11 @@ namespace CoDArchipelago.VisualPatches
             {"PALACE_LOBBY_FAUCET_ON", "CAVE"},
             {"PALACE_LOBBY_WHIRLPOOL_ON", "CAVE"},
 
+            {"OBSERVATORY_SUCCESS", "PALACE"},
+
+            {"UNDEAD_WET", "GALLERY"},
+            {"CHALICE_BRIDGE_ACTIVE", "GALLERY"},
+
             {"TELEPORT_LAKE", "LAKE"},
             {"TELEPORT_MONSTER", "MONSTER"},
             {"TELEPORT_PALACE", "PALACE"},

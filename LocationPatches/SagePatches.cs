@@ -2,19 +2,49 @@ using System.Linq;
 using HarmonyLib;
 using TMPro;
 using CoDArchipelago.GlobalGameScene;
+using UnityEngine;
+using System.Collections.Generic;
 
 namespace CoDArchipelago
 {
     static class SagePatches
     {
-        class ChangeHasSkillPopup : InstantiateOnGameSceneLoad
+        static string[] sageRandomResponses = new string[] {
+            "Hey, Fynn! Make sure to take good care of your friends. Fast food is bad for you, after all!",
+            "Don't forget to check behind the turtle statue in Moon Cavern!",
+            "Did you know you can check the interactability of things by sitting?",
+            "Oh, hello, Fynn! I've been trying out Timespinner. It's pretty fun!",
+            "Have you played the Oracle games? You really should!",
+            "If you haven't yet, you should try out GMOTA!"
+        };
+
+        static string SageRandomResponse(Dialog dialog)
         {
-            public ChangeHasSkillPopup()
+            List<string> randomResponses = new();
+            randomResponses.AddRange(sageRandomResponses);
+
+            // APClient.Client client = APClient.Client.Instance;
+            // TODO: add more dialogue based on player options
+
+            return randomResponses[Random.Range(0, randomResponses.Count)];
+        }
+
+        class SageRandomResponses : InstantiateOnGameSceneLoad
+        {
+            public SageRandomResponses()
             {
-                GameScene.FindInScene("Rendering", "Canvas/PauseMenu/PauseMenuPage1/SageReminder/ButtonText")
-                    .GetComponent<TextMeshProUGUI>()
-                    .SetText("NEW ITEM\nAVAILABLE!");
+                MiscPatches.DialogPatches.RegisterDynamicDialogPatch(
+                    "/CAVE/Sun Cavern (Main)/Cutscenes/Sage Cutscenes/Sage Post Intro/SageDialog",
+                    SageRandomResponse
+                );
             }
+        }
+
+        static void ChangeHasSkillPopup()
+        {
+            GameScene.FindInScene("Rendering", "Canvas/PauseMenu/PauseMenuPage1/SageReminder/ButtonText")
+                .GetComponent<TextMeshProUGUI>()
+                .SetText("NEW ITEM\nAVAILABLE!");
         }
 
         static bool HasFlag(string flag_name) => GlobalHub.Instance.save.GetFlag(flag_name).on;

@@ -32,7 +32,7 @@ namespace CoDArchipelago.Cutscenes
             this.whitelist = new string[]{};
         }
 
-        static void MakeEventFast(Event ev)
+        public static void MakeEventFast(Event ev)
         {
             ev.start = 0;
 

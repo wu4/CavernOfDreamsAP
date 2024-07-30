@@ -108,7 +108,7 @@ namespace CoDArchipelago.Messaging
             } else {
                 if (textLogInputField.text != "") {
                     PlaySendSound();
-                    AddLine(textLogInputField.text);
+                    APClient.Client.Instance.SendMessage(textLogInputField.text);
                     textLogInputField.text = "";
                 } else {
                     PlayCloseSound();

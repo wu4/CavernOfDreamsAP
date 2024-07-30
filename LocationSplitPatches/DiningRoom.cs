@@ -1,10 +1,10 @@
 using CoDArchipelago.GlobalGameScene;
 
-namespace CoDArchipelago
+namespace CoDArchipelago.LocationSplitPatches
 {
-    class DiningRoomPatches : InstantiateOnGameSceneLoad
+    class DiningRoom : InstantiateOnGameSceneLoad
     {
-        public DiningRoomPatches()
+        public DiningRoom()
         {
             PatchThroneCutscene();
 

@@ -6,6 +6,7 @@ namespace CoDArchipelago.Collecting
     {
         public readonly int playerId;
         public readonly string itemName;
+        public readonly string itemPrettyName;
 
         public override string GetFlag() {
             if (Data.allItemsByName.TryGetValue(itemName, out string ret)) return ret;
@@ -13,18 +14,13 @@ namespace CoDArchipelago.Collecting
             throw new Exception("invalid use of GetFlag: flag for " + itemName + " does not exist");
         }
 
-        public TheirItem(int playerId, string itemName, bool isMajor)
+        public TheirItem(int playerId, string itemName, string itemPrettyName, bool isMajor, long? locationId = null) : base(locationId)
         {
             this.playerId = playerId;
             this.itemName = itemName;
+            this.itemPrettyName = itemPrettyName;
 
             type = isMajor ? APCollectibleType.Major : APCollectibleType.Minor;
-        }
-
-        public override void Collect()
-        {
-            // CollectJingle(type);
-            // SaveHandler.SaveFile(GlobalHub.Instance.save, GlobalHub.numSaveFile);
         }
     }
 }

@@ -17,10 +17,10 @@ namespace CoDArchipelago.MiscPatches
             var gate = area.transform.Find("seadeep/Fella_Gate");
             var raise = gate.GetComponent<Raise>();
 
-            if (!randomized) {
-                raise.activated = true;
-                return;
-            }
+            // if (!randomized) {
+            //     raise.activated = true;
+            //     return;
+            // }
 
             int raiseTime = 60;
             raise.raiseTime = raiseTime;

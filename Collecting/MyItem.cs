@@ -6,6 +6,8 @@ namespace CoDArchipelago.Collecting
 {
     class MyItem : Item
     {
+        bool silent;
+
         static readonly Dictionary<string, Action<bool>> itemTriggers = new();
         public static void RegisterTrigger(string itemFlag, Action<bool> action) =>
             itemTriggers.Add(itemFlag, action);
@@ -36,26 +38,21 @@ namespace CoDArchipelago.Collecting
 
         public readonly bool randomized;
 
-        public MyItem(string flag, bool randomized = true)
+        public MyItem(string flag, bool randomized = true, bool silent = false, long? locationId = null) : base(locationId)
         {
             this.flag = flag;
             this.randomized = randomized;
+            this.silent = silent;
             type = GetFlagCollectibleType(flag);
         }
 
         public override void Collect()
         {
-            // CollectJingle(type);
-
-            if (randomized) {
-                Messaging.TextLogManager.AddLine("containing " + Data.allItems[flag]);
-            }
-
             if (itemTriggers.TryGetValue(flag, out Action<bool> itemTrigger)) {
                 itemTrigger(randomized);
             }
 
-            bool collectedAsCutscene = Cutscenes.Collecting.TryCollect(flag);
+            bool collectedAsCutscene = Cutscenes.Collecting.TryCollect(flag, silent);
 
             if (!collectedAsCutscene) {
                 GlobalHub.Instance.save.SetFlag(flag, true);
@@ -63,10 +60,13 @@ namespace CoDArchipelago.Collecting
 
             if (type is Collectible.CollectibleType vanillaType && vanillaType != Collectible.CollectibleType.ITEM) {
                 GlobalHub.Instance.save.AddCollectible(vanillaType, 1);
-                UIController.Instance.SetModelVisible(vanillaType);
-                UIController.Instance.collectibleCounter.text = GlobalHub.Instance.save.GetCollectible(vanillaType).ToString();
+                if (!silent) {
+                    UIController.Instance.SetModelVisible(vanillaType);
+                    UIController.Instance.collectibleCounter.text = GlobalHub.Instance.save.GetCollectible(vanillaType).ToString();
+                }
             }
-            // SaveHandler.SaveFile(GlobalHub.Instance.save, GlobalHub.numSaveFile);
+
+            base.Collect();
         }
     }
 }
