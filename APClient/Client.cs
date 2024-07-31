@@ -7,10 +7,7 @@ using HarmonyLib;
 using UnityEngine;
 using Archipelago.MultiClient.Net;
 using Archipelago.MultiClient.Net.Enums;
-using Archipelago.MultiClient.Net.Models;
 using Archipelago.MultiClient.Net.MessageLog.Messages;
-using Archipelago.MultiClient.Net.MessageLog.Parts;
-using Archipelago.MultiClient.Net.Packets;
 
 namespace CoDArchipelago.APClient
 {

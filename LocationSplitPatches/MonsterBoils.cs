@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using CoDArchipelago.GlobalGameScene;
 using HarmonyLib;
 using UnityEngine;
