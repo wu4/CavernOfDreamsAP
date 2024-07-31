@@ -63,6 +63,8 @@ namespace CoDArchipelago.MiscPatches
             // cc.Get(player).enabled = true;
         }
 
+        public static bool shouldSendDeathLink = true;
+
         [HarmonyPatch(typeof(Player), "Die")]
         static class DiePatch
         {
@@ -71,6 +73,10 @@ namespace CoDArchipelago.MiscPatches
 
             static bool Prefix(Player __instance, Kill.KillType killType) {
                 if (warpIsDeath.Get(GlobalHub.Instance) || isDying) return false;
+                if (shouldSendDeathLink) {
+                    APClient.Client.Instance.SendDeathLink(killType);
+                }
+
                 isDying = true;
                 if (killType == (Kill.KillType)WaterTeleportDeath.WATER) {
                     HideFynn(__instance);

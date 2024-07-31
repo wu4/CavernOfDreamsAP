@@ -8,15 +8,16 @@ using UnityEngine;
 using Archipelago.MultiClient.Net;
 using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.MessageLog.Messages;
+using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
 
 namespace CoDArchipelago.APClient
 {
-
     class Client : InstantiateOnGameSceneLoad
     {
         public static Client Instance;
         ConcurrentQueue<Action> mainThreadQueue;
         MainThreadExecutor executor;
+
         // Timer jingleCooldown;
 
         class MainThreadExecutor : MonoBehaviour
@@ -42,6 +43,7 @@ namespace CoDArchipelago.APClient
         }
 
         ArchipelagoSession session;
+        DeathLinkService deathLinkService;
         string playerName = "wuffie";
         int slot;
 
@@ -138,7 +140,27 @@ namespace CoDArchipelago.APClient
             //     new Collecting.MyItem(Data.allItemsByName[item.ItemName]).Collect();
             // }
 
+            deathLinkService = session.CreateDeathLinkService();
+            deathLinkService.EnableDeathLink();
+
+            deathLinkService.OnDeathLinkReceived += OnDeathLinkReceived;
+
             await InitializeLocations();
+        }
+
+        public void SendDeathLink(Kill.KillType killType)
+        {
+            DeathLink deathLink = new(playerName);
+            deathLinkService.SendDeathLink(deathLink);
+        }
+
+        void OnDeathLinkReceived(DeathLink deathLink)
+        {
+            mainThreadQueue.Enqueue(() => {
+                MiscPatches.DeathPatches.shouldSendDeathLink = false;
+                GlobalHub.Instance.player.Die(Kill.KillType.WOUND);
+                MiscPatches.DeathPatches.shouldSendDeathLink = true;
+            });
         }
 
         void InitializeItems()

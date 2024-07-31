@@ -30,7 +30,7 @@ namespace CoDArchipelago.LocationSplitPatches
             drownWater.flag = LOCATION_FLAG;
             bubbleUp.GetComponent<TwoState>().flag = LOCATION_FLAG;
             propellerRotate.GetComponent<TwoStateComponent>().flag = LOCATION_FLAG;
-            propellerSFX.GetComponent<TwoState>().flag = LOCATION_FLAG;
+            // propellerSFX does not have a TwoState
 
             area.Find("FogHandlers/WaterFogHandler").GetComponent<FogHandlerDrown>().flag = LOCATION_FLAG;
 
