@@ -126,9 +126,13 @@ namespace CoDArchipelago.APClient
             var loginSuccess = (LoginSuccessful)loginResult;
             slot = loginSuccess.Slot;
 
-            FlagCache.CachedAPFlags.splitGratitudeAndTeleports = (bool)loginSuccess.SlotData["splitGratitude"];
+            bool splitGratitudeAndTeleports = (bool)loginSuccess.SlotData["splitGratitude"];
 
-            LocationSplitPatches.GratitudeTeleports.LinkGratitudeWithTeleports.Init();
+            Debug.Log($"splitGratitudeAndTeleports = {splitGratitudeAndTeleports}");
+
+            if (!splitGratitudeAndTeleports) {
+                LocationSplitPatches.GratitudeTeleports.LinkGratitudeWithTeleports.RegisterLinks();
+            }
 
             // mainThreadQueue.Append(jingleCooldown.Reset);
 

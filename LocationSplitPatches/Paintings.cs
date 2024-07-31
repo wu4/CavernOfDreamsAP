@@ -1,24 +1,33 @@
-using System;
 using CoDArchipelago.GlobalGameScene;
 
 namespace CoDArchipelago.LocationSplitPatches
 {
     class Paintings : InstantiateOnGameSceneLoad
     {
-        static void PatchPainting(string fullPath)
+        static void PatchPainting(string path)
         {
-            var ts = GameScene.FindInSceneFullPath(fullPath).GetComponent<TwoStateExists>();
-            ts.flag = $"LOCATION_{ts.flag}";
+            var painting = GameScene.FindInScene("GALLERY", path);
+            var twoState = painting.GetComponent<TwoStateExists>();
+            var modelFadeIn = painting.GetComponent<ModelFadeIn>();
+
+            var flag = twoState.flag;
+            var locationFlag = $"LOCATION_{flag}";
+            twoState.flag = locationFlag;
+            modelFadeIn.flag = locationFlag;
+
+            Collecting.Location.RegisterTrigger(locationFlag, () => {
+                modelFadeIn.Activate();
+            });
         }
 
         public Paintings()
         {
-            PatchPainting("GALLERY/Earth Lobby/Objects (Castle)/PaintingWarpUndead/DryPainting");
+            PatchPainting("Earth Lobby/Objects (Castle)/PaintingWarpUndead/DryPainting");
 
-            PatchPainting("GALLERY/Earth Lobby/Objects (Entrance)/PaintingUnfinishedKappa/KappaArtworkUnfinished");
-            PatchPainting("GALLERY/Fire Lobby/Objects/PaintingUnfinishedMONSTER/ArtworkUnfinished");
-            PatchPainting("GALLERY/Water Lobby/Objects Storage/PaintingUnfinishedPrincess/PrincessArtworkUnfinished");
-            PatchPainting("GALLERY/Foyer (Main)/Paintings/PaintingUnfinishedSage/SageArtworkUnfinished");
+            PatchPainting("Earth Lobby/Objects (Entrance)/PaintingUnfinishedKappa/KappaArtworkUnfinished");
+            PatchPainting("Fire Lobby/Objects/PaintingUnfinishedMONSTER/ArtworkUnfinished");
+            PatchPainting("Water Lobby/Objects Storage/PaintingUnfinishedPrincess/PrincessArtworkUnfinished");
+            PatchPainting("Foyer (Main)/Paintings/PaintingUnfinishedSage/SageArtworkUnfinished");
         }
     }
 }

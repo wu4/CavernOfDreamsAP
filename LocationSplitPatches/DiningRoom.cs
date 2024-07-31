@@ -4,11 +4,12 @@ namespace CoDArchipelago.LocationSplitPatches
 {
     class DiningRoom : InstantiateOnGameSceneLoad
     {
+        static readonly string LOCATION_FLAG = "LOCATION_PALACE_DINING_ROOM_RISEN";
+
         public DiningRoom()
         {
             PatchThroneCutscene();
-
-            Collecting.Location.RegisterTrigger("LOCATION_PALACE_DINING_ROOM_RISEN", PressButton);
+            PatchThronePreston();
         }
 
         /// <summary>
@@ -25,13 +26,18 @@ namespace CoDArchipelago.LocationSplitPatches
         }
 
         /// <summary>
-        /// Presses the button in the Dining Room
+        /// Separates the button from the throne
         /// </summary>
-        public static void PressButton()
+        static void PatchThronePreston()
         {
             var preston = GameScene.FindInScene("PALACE", "Dining Room/dining_room2/Throne_Switch");
-            StockSFX.Instance.click.Play();
-            preston.GetComponentInChildren<Raise>().Activate();
+            var prestonRaise = preston.GetComponentInChildren<Raise>();
+            prestonRaise.flag = LOCATION_FLAG;
+
+            Collecting.Location.RegisterTrigger(LOCATION_FLAG, () => {
+                StockSFX.Instance.click.Play();
+                prestonRaise.Activate();
+            });
         }
     }
 }

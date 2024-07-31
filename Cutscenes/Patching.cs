@@ -88,19 +88,6 @@ namespace CoDArchipelago.Cutscenes
                         "PlayBreakSFX"
                     )},
 
-                    {"Monster Lobby/Cutscenes/PipesRisen", new(
-                        WLOptions.None,
-                        "Raise Pipe",
-                        "Raise Pipe (1)",
-                        "Raise Pipe (2)",
-                        "Raise Pipe (3)",
-                        "Raise Pipe (4)"
-                    )},
-                    {"Monster Lobby/Cutscenes/Steam", new(
-                        WLOptions.None,
-                        "AwakenSteam"
-                    )},
-
                     {"Palace Lobby/Cutscenes/FaucetCutscene", new(
                         WLOptions.MakeFast,
                         "EnableFaucetSFX",
@@ -308,12 +295,12 @@ namespace CoDArchipelago.Cutscenes
                     )},
                     {"Earth Lobby/Cutscenes/KappaPaintingSuccess", new(
                         WLOptions.None,
-                        "FadeOutArtworkUnfinished",
+                        // "FadeOutArtworkUnfinished",
                         "DestroyDragonSkullGem"
                     )},
                     {"Earth Lobby/Cutscenes/UndeadPaintingWet", new(
-                        WLOptions.None,
-                        "DryPaintingFadeOut"
+                        WLOptions.None
+                        // "DryPaintingFadeOut"
                     )},
 
                     {"Fire Lobby/Cutscenes/MonsterPaintingSuccessCutscene", new(
@@ -334,7 +321,7 @@ namespace CoDArchipelago.Cutscenes
 
                     {"Water Lobby/Cutscenes/FinishPrincessPainting", new(
                         WLOptions.None,
-                        "FadeOutArtworkUnfinished",
+                        // "FadeOutArtworkUnfinished",
                         "OpenChest"
                     )},
                     {"Water Lobby/Cutscenes/AngelStatueShadowsSuccess", new(

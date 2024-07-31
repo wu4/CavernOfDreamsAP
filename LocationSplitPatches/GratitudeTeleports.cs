@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System;
 using CoDArchipelago.Collecting;
 using CoDArchipelago.GlobalGameScene;
-using CoDArchipelago.FlagCache;
 
 namespace CoDArchipelago.LocationSplitPatches
 {
@@ -18,17 +17,15 @@ namespace CoDArchipelago.LocationSplitPatches
                 {"GRATITUDE4", "TELEPORT_GALLERY"},
             };
             static Action<bool> SetTeleportFlagFactory(string teleportFlag) =>
-                gratitudeRandomized => new MyItem(teleportFlag, randomized: gratitudeRandomized || CachedAPFlags.splitGratitudeAndTeleports).Collect();
+                gratitudeRandomized => new MyItem(teleportFlag, randomized: true).Collect();
 
             static void RegisterGratitudeTeleportLink(string gratitudeFlag, string teleportFlag) =>
                 MyItem.RegisterTrigger(gratitudeFlag, SetTeleportFlagFactory(teleportFlag));
 
-            public static void Init()
+            public static void RegisterLinks()
             {
-                if (!CachedAPFlags.splitGratitudeAndTeleports) {
-                    foreach ((string gratitudeFlag, string teleportFlag) in gratitudeTeleportFlagMap) {
-                        RegisterGratitudeTeleportLink(gratitudeFlag, teleportFlag);
-                    }
+                foreach ((string gratitudeFlag, string teleportFlag) in gratitudeTeleportFlagMap) {
+                    RegisterGratitudeTeleportLink(gratitudeFlag, teleportFlag);
                 }
             }
         }
