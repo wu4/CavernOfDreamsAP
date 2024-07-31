@@ -25,8 +25,8 @@ namespace CoDArchipelago.Messaging
             inputViewport.transform.SetParent(container.transform, false);
             GameObject inputPlaceholderContainer = new("Input Placeholder");
             inputPlaceholderContainer.transform.SetParent(inputViewport.transform, false);
-            GameObject inputTextComponent = new("Input Text");
-            inputTextComponent.transform.SetParent(inputViewport.transform, false);
+            GameObject inputTextContainer = new("Input Text");
+            inputTextContainer.transform.SetParent(inputViewport.transform, false);
 
             // var image = gameObject.AddComponent<Image>();
             // image.sprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/InputFieldBackground.psd");
@@ -46,7 +46,7 @@ namespace CoDArchipelago.Messaging
 
             Helpers.CreatePaddedTransform(inputViewport);
 
-            Text inputText = inputTextComponent.AddComponent<Text>();
+            Text inputText = inputTextContainer.AddComponent<Text>();
             // inputText.text = "";
             inputText.fontSize = 14;
             inputText.fontStyle = FontStyle.Normal;
@@ -58,6 +58,11 @@ namespace CoDArchipelago.Messaging
             //inputTextUGUI.fontSize = 14;
             //inputTextUGUI.color = Color.white;
 
+            var outline = inputTextContainer.AddComponent<Outline>();
+            outline.effectDistance = new(0.5f, -0.5f);
+            outline.effectColor = new(0, 0, 0, 1);
+            outline.useGraphicAlpha = true;
+
             Text inputPlaceholder = inputPlaceholderContainer.AddComponent<Text>();
             inputPlaceholder.text = "Send a message...";
             inputPlaceholder.fontSize = 14;
@@ -66,11 +71,16 @@ namespace CoDArchipelago.Messaging
             // inputPlaceholderUGUI.enableWordWrapping = false;
             // inputPlaceholderUGUI.extraPadding = true;
 
+            var placeholderOutline = inputPlaceholderContainer.AddComponent<Outline>();
+            placeholderOutline.effectDistance = new(0.5f, -0.5f);
+            placeholderOutline.effectColor = new(0, 0, 0, 1);
+            placeholderOutline.useGraphicAlpha = true;
+
             inputPlaceholder.color = inputText.color with {
                 a = inputText.color.a * 0.5f
             };
 
-            Helpers.CreatePaddedTransform(inputTextComponent);
+            Helpers.CreatePaddedTransform(inputTextContainer);
 
             Helpers.CreatePaddedTransform(inputPlaceholderContainer);
 
