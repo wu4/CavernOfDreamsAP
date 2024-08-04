@@ -7,7 +7,7 @@ namespace CoDArchipelago.Messaging
 {
     class TextLogInputField : InputField
     {
-        static readonly Font textFont = Resources.GetBuiltinResource<Font>("Arial.ttf");
+        public static readonly Font textFont = Resources.GetBuiltinResource<Font>("Arial.ttf");
 
         public static TextLogInputField Create(Transform parent)
         {

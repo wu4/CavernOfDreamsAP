@@ -28,6 +28,8 @@ namespace CoDArchipelago.Collecting
             if (Data.eventItems.ContainsKey(flag) ||
                 Data.teleportItems.ContainsKey(flag))          return APCollectibleType.Event;
             if (Data.shroomItems.ContainsKey(flag))            return Collectible.CollectibleType.NOTE;
+            if (Data.carryableItems.ContainsKey(flag) ||
+                Data.carryableItems.ContainsValue(flag))       return APCollectibleType.Carryable;
 
             throw new System.Exception("Unknown type for collectible " + flag);
         }

@@ -50,6 +50,7 @@ namespace CoDArchipelago.VisualPatches
 
             static Dictionary<string, Dictionary<string, ObjectPatcher>> replacementObjectsByGame;
             static Dictionary<Enum, ObjectPatcher> replacementObjectsByType;
+            [LoadOrder(Int32.MinValue + 2)]
             public ReplacementObjects()
             {
                 replacementObjectsByType = replacementObjectConstructorsByType
@@ -110,6 +111,8 @@ namespace CoDArchipelago.VisualPatches
 
             Collecting.Item item;
 
+            // Debug.LogWarning((obj.name, ts.flag));
+
             if (!Location.checks.TryGetValue(ts.flag, out item))
                 item = new MyItem(ts.flag.Substring(9), randomized: false);
 
@@ -150,6 +153,11 @@ namespace CoDArchipelago.VisualPatches
 
                 PatchCollectible(col);
             }
+
+            // var carryables = GameScene.GetComponentsInChildren<Area>(true).SelectMany(area => area.GetComponentsInChildren<LocationPatches.Carryables.CarryableTwoState>(true));
+            // foreach (TwoState carryable in carryables) {
+            //     PatchCollectible(carryable);
+            // }
         }
 
         // [HarmonyPatch(typeof(Area), "Activate")]

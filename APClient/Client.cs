@@ -42,9 +42,19 @@ namespace CoDArchipelago.APClient
             }
         }
 
+        static string playerName;
+        static string address;
+        static int port;
+
+        public static void SetConnection(string _playerName, string _address, int _port)
+        {
+            playerName = _playerName;
+            address = _address;
+            port = _port;
+        }
+
         ArchipelagoSession session;
         DeathLinkService deathLinkService;
-        string playerName = "wuffie";
         int slot;
 
         [LoadOrder(Int32.MaxValue)]
@@ -54,7 +64,7 @@ namespace CoDArchipelago.APClient
             // jingleCooldown = new(60);
             // jingleCooldown.Reset();
             mainThreadQueue = new();
-            session = ArchipelagoSessionFactory.CreateSession("localhost");
+            session = ArchipelagoSessionFactory.CreateSession(address, port);
             GameObject manager = new GameObject("AP Connection Manager");
             executor = manager.AddComponent<MainThreadExecutor>();
             session.MessageLog.OnMessageReceived += OnMessageReceived;
@@ -198,7 +208,7 @@ namespace CoDArchipelago.APClient
 
         async Task InitializeLocations()
         {
-            var ids = session.Locations.AllMissingLocations.ToArray();
+            var ids = session.Locations.AllLocations.ToArray();
 
             var info = await session.Locations.ScoutLocationsAsync(
                 createAsHint: false,
@@ -218,11 +228,15 @@ namespace CoDArchipelago.APClient
 
                 if (itemInfo.Player.Slot == slot) {
                     var itemName = itemInfo.ItemName;
-                    var itemFlag = Data.allItemsByName[itemName];
+
+                    if (!Data.carryableItems.ContainsValue(itemName)) {
+                        itemName = Data.allItemsByName[itemName];
+                    }
+
                     Collecting.Location.checks.Add(
                         locationFlag,
                         new Collecting.MyItem(
-                            flag: itemFlag,
+                            flag: itemName,
                             locationId: location
                         )
                     );

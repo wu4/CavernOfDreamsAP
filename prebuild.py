@@ -9,6 +9,8 @@ def categories_as_code(type: str, container: Iterable[tuple[str, Iterable[tuple[
     normal: list[str] = []
     all.append(start(f"all{type}"))
     for category, rows in container:
+        if type == "ItemsByName" and category == "carryable": continue
+
         normal.append(start(f"{category}{type}"))
         for a, b in rows:
             entry = '{' + f'"{a}","{b}"' + '},'
@@ -21,6 +23,7 @@ def categories_as_code(type: str, container: Iterable[tuple[str, Iterable[tuple[
 
 if __name__ == "__main__":
     accum: list[str] = []
+    print("Generating Generated.cs...")
 
     accum.append("// Generated using prebuild.py")
 
@@ -42,4 +45,4 @@ if __name__ == "__main__":
 
     with open("Generated.cs", "w") as out_cs:
         _ = out_cs.write("\n".join(accum))
-    print("Done")
+    print("...Done")

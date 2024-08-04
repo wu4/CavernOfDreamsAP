@@ -6,7 +6,8 @@ namespace CoDArchipelago.Collecting
         Minor,
         Major,
         Event,
-        Ability
+        Ability,
+        Carryable
     }
 
     abstract class Item

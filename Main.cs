@@ -5,11 +5,13 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using static CoDArchipelago.CodeGenerationHelpers;
 
 namespace CoDArchipelago
 {
     class InstantiateOnGameSceneLoad {}
+    class InstantiateOnMenuLoad {}
 
     [AttributeUsage(AttributeTargets.Constructor)]
     class LoadOrder : Attribute
@@ -36,7 +38,6 @@ namespace CoDArchipelago
 
         public static void Invoke()
         {
-            // Dictionary<string, double> timings = new();
             foreach (var constructorGroup in groupedConstructors) {
                 foreach (var (ClassName, Constructor) in constructorGroup) {
                     try {
@@ -47,30 +48,56 @@ namespace CoDArchipelago
                         throw e;
                     }
                 }
-                // Parallel.ForEach(
-                //     constructorGroup,
-                //     c => {
-                //         var (ClassName, Constructor) = c;
-                //         try {
-                //             Debug.Log("Firing constructor for " + ClassName);
-                //             // var start = DateTime.Now;
-                //             Constructor.Invoke(new object[] {});
-                //             // timings.Add(ClassName, (DateTime.Now - start).TotalSeconds);
-                //         } catch (Exception e) {
-                //             Debug.LogError("Error during constructor for " + ClassName + ":");
-                //             throw e;
-                //         }
-                //     }
-                // );
             }
-            // foreach ((var name, var val) in timings.OrderByDescending(i => i.Value)) {
-            //     Debug.Log(name + ": " + val + "s");
-            // }
         }
     }
 
+    static class MenuLoadMethods
+    {
+        static readonly List<List<(string ClassName, ConstructorInfo Constructor)>> groupedMenuConstructors =
+            Assembly.GetExecutingAssembly()
+                .GetTypes()
+                .Where(type => type.IsSubclassOf(typeof(InstantiateOnMenuLoad)))
+                .Select(type => (type.ToString(), type.GetConstructor(new Type[] {})))
+                .GroupBy(item => item.Item2.GetCustomAttribute<LoadOrder>()?.loadOrder ?? 0)
+                .ToDictionary(
+                    group => group.Key,
+                    group => group.ToList()
+                )
+                .OrderBy(item => item.Key)
+                .Select(item => item.Value)
+                .ToList();
+
+        public static void Invoke()
+        {
+            foreach (var constructorGroup in groupedMenuConstructors) {
+                foreach (var (ClassName, Constructor) in constructorGroup) {
+                    try {
+                        Debug.Log("Firing constructor for " + ClassName);
+                        Constructor.Invoke(new object[] {});
+                    } catch (Exception e) {
+                        Debug.LogError("Error during constructor for " + ClassName + ":");
+                        throw e;
+                    }
+                }
+            }
+        }
+    }
+
+
     static class InitPatches
     {
+        public static void AddMenuInit()
+        {
+            SceneManager.sceneLoaded += (scene, mode) => {
+                if (scene.name == "MainMenu") {
+                    MenuLoadMethods.Invoke();
+                } else {
+                    Debug.LogError("Not firing");
+                }
+            };
+        }
+
         [HarmonyPatch(typeof(GlobalHub), "Awake")]
         static class InitPatch
         {
