@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem.UI;
 using TMPro;
 using System.Reflection;
 using UnityEngine.SceneManagement;
@@ -484,6 +485,11 @@ namespace CoDArchipelago.APClient
 
         public PatchAPMenu()
         {
+            GameObject eventSystemObj = new("EventSystem");
+            var ev = eventSystemObj.AddComponent<EventSystem>();
+            eventSystemObj.AddComponent<InputSystemUIInputModule>();
+            EventSystem.current = ev;
+
             GameObject canvas = GameObject.Find("Canvas");
 
             GameObject fileSelectOption = canvas.transform.Find("MainMenu/Page1/FileSelect").gameObject;

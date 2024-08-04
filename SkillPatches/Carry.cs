@@ -9,9 +9,7 @@ namespace CoDArchipelago.SkillPatches
         {
             static bool Prefix(Player __instance, ref bool __result)
             {
-                if (FlagCache.CachedSkillFlags.carry) return true;
-
-                __result = false;
+                __result = FlagCache.CachedSkillFlags.carry;
                 return false;
             }
         }
