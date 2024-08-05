@@ -20,9 +20,6 @@ namespace CoDArchipelago.FlagCache
 
     public static class CachedSkillFlags
     {
-        [LoadsFromFlag("SKILL", "ATTACK")]
-        public static bool attack = false;
-
         [LoadsFromFlag("SKILL", "GROUNDATTACK")]
         public static bool groundAttack = false;
 
