@@ -8,6 +8,28 @@ namespace CoDArchipelago.LocationPatches
 {
     class FellaNestPatches : InstantiateOnGameSceneLoad
     {
+        public static readonly List<HatchableFellaInfo> hatchableFellaNests = new() {
+            new("Nest FellaHatchable Lake",    "FELLA_LAKE1",    "LOCATION_GRATITUDE1", 40),
+            new("Nest FellaHatchable Monster", "FELLA_MONSTER1", "LOCATION_GRATITUDE2", 40 + 60),
+            new("Nest FellaHatchable Palace",  "FELLA_PALACE1",  "LOCATION_GRATITUDE3", 40 + 60 + 80),
+            new("Nest FellaHatchable Gallery", "FELLA_GALLERY1", "LOCATION_GRATITUDE4", 40 + 60 + 80 + 100),
+        };
+
+        public class HatchableFellaInfo
+        {
+            public readonly string nestName;
+            public readonly string hatchedFlag;
+            public readonly string gratitudeFlag;
+            public readonly int requirement;
+
+            public HatchableFellaInfo(string nestName, string hatchedFlag, string gratitudeFlag, int requirement) {
+                this.nestName = nestName;
+                this.hatchedFlag = hatchedFlag;
+                this.gratitudeFlag = gratitudeFlag;
+                this.requirement = requirement;
+            }
+        }
+
         public FellaNestPatches()
         {
             var fellas = GameScene.FindInScene("CAVE", "Sun Cavern (Main)/Fellas");
@@ -19,7 +41,6 @@ namespace CoDArchipelago.LocationPatches
                 Component.DestroyImmediate(fellaNest.Find("HintStone").GetComponent<TwoState>());
 
                 GameObject hatchedObj = fellaNest.Find("FellaHatched").gameObject;
-                // hatchedObj.GetComponent<TwoState>().flag = kv.Value.hatchedFlag;
                 FellaHatched hatched = hatchedObj.GetComponent<FellaHatched>();
                 hatched.notesRequirement = nest.requirement;
                 hatched.gratitudeFlag = nest.gratitudeFlag;
@@ -27,9 +48,20 @@ namespace CoDArchipelago.LocationPatches
                 GameObject hatchable = fellaNest.Find("FellaHatchable").gameObject;
 
                 Collecting.MyItem.RegisterTrigger(nest.hatchedFlag, ShowFellaFactory(hatchable));
+                Collecting.Location.RegisterTrigger(nest.gratitudeFlag, FeedFellaFactory(nest.hatchedFlag, hatched));
+
                 string noMoreNotesDialogPath = hatchedObj.transform.Find("Cutscenes/NoMoreNotesCutscene/NoMoreNotesDialog").GetPath();
                 MiscPatches.DialogPatches.RegisterDynamicDialogPatch(noMoreNotesDialogPath, NotEnoughNotesDialogFactory(nest.requirement));
             }
+        }
+
+        static Action FeedFellaFactory(string hatchedFlag, FellaHatched hatched)
+        {
+            return () => {
+                // coverage for loading into a seed with the flag already set
+                GlobalHub.Instance.save.SetFlag($"{hatchedFlag}_HATCHED", true);
+                hatched.StopBeingHungry();
+            };
         }
 
         static Action<bool> ShowFellaFactory(GameObject hatchable)
@@ -121,27 +153,5 @@ namespace CoDArchipelago.LocationPatches
                 return false;
             }
         }
-
-        public class HatchableFellaInfo
-        {
-            public readonly string nestName;
-            public readonly string hatchedFlag;
-            public readonly string gratitudeFlag;
-            public readonly int requirement;
-
-            public HatchableFellaInfo(string nestName, string hatchedFlag, string gratitudeFlag, int requirement) {
-                this.nestName = nestName;
-                this.hatchedFlag = hatchedFlag;
-                this.gratitudeFlag = gratitudeFlag;
-                this.requirement = requirement;
-            }
-        }
-
-        public static readonly List<HatchableFellaInfo> hatchableFellaNests = new() {
-            new("Nest FellaHatchable Lake",    "FELLA_LAKE1",    "LOCATION_GRATITUDE1", 40),
-            new("Nest FellaHatchable Monster", "FELLA_MONSTER1", "LOCATION_GRATITUDE2", 40 + 60),
-            new("Nest FellaHatchable Palace",  "FELLA_PALACE1",  "LOCATION_GRATITUDE3", 40 + 60 + 80),
-            new("Nest FellaHatchable Gallery", "FELLA_GALLERY1", "LOCATION_GRATITUDE4", 40 + 60 + 80 + 100),
-        };
     }
 }
