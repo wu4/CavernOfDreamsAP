@@ -15,7 +15,7 @@ namespace CoDArchipelago.APClient
     class Client : InstantiateOnGameSceneLoad
     {
         public static Client Instance;
-        ConcurrentQueue<Action> mainThreadQueue;
+        ConcurrentQueue<(string, Action)> mainThreadQueue;
         MainThreadExecutor executor;
 
         // Timer jingleCooldown;
@@ -26,8 +26,14 @@ namespace CoDArchipelago.APClient
             {
                 // Instance.jingleCooldown.Update();
 
-                while (Instance.mainThreadQueue.TryDequeue(out var action)) {
-                    action();
+                while (Instance.mainThreadQueue.TryDequeue(out var nameAndAction)) {
+                    (var name, var action) = nameAndAction;
+                    try {
+                        action();
+                    } catch (Exception e) {
+                        Debug.LogError($"Error while executing {name}:");
+                        Debug.LogError(e);
+                    }
                 }
             }
         }
@@ -87,9 +93,9 @@ namespace CoDArchipelago.APClient
                 messageString += "</color>";
             }
 
-            mainThreadQueue.Enqueue(() => {
+            mainThreadQueue.Enqueue(("OnMessageReceived", () => {
                 Messaging.TextLogManager.AddLine(messageString);
-            });
+            }));
         }
 
         public void SendLocationCollected(long locationId)
@@ -166,11 +172,11 @@ namespace CoDArchipelago.APClient
 
         void OnDeathLinkReceived(DeathLink deathLink)
         {
-            mainThreadQueue.Enqueue(() => {
+            mainThreadQueue.Enqueue(("OnDeathLinkReceived", () => {
                 MiscPatches.DeathPatches.shouldSendDeathLink = false;
                 GlobalHub.Instance.player.Die(Kill.KillType.WOUND);
                 MiscPatches.DeathPatches.shouldSendDeathLink = true;
-            });
+            }));
         }
 
         void InitializeItems()
@@ -180,7 +186,7 @@ namespace CoDArchipelago.APClient
                 var itemReceivedName = peekedItem.ItemName;
                 var itemFlag = Data.allItemsByName[itemReceivedName];
 
-                mainThreadQueue.Enqueue(() => {
+                mainThreadQueue.Enqueue(($"Initializing item for flag {itemFlag}", () => {
                     Save save = GlobalHub.Instance.save;
 
                     bool locallyCollected = save.GetFlag(itemFlag).on;
@@ -195,7 +201,7 @@ namespace CoDArchipelago.APClient
                     if (isCheatedOrStartingInventory) return;
 
                     VisualPatches.VisualPatches.CollectJingle(collectingItem);
-                });
+                }));
 
                 receivedItemsHelper.DequeueItem();
             };
@@ -258,7 +264,7 @@ namespace CoDArchipelago.APClient
 
             List<string> checkedLocationFlags = session.Locations.AllLocationsChecked.Select(location => Data.allLocationsByName[session.Locations.GetLocationNameFromId(location)]).ToList();
 
-            mainThreadQueue.Enqueue(() => {
+            mainThreadQueue.Enqueue(("PatchAllVisuals", () => {
                 VisualPatches.VisualPatches.PatchAllVisuals();
 
                 Collecting.Location.skipCollect = true;
@@ -268,7 +274,7 @@ namespace CoDArchipelago.APClient
                 Collecting.Location.skipCollect = false;
 
                 GlobalHub.Instance.GetArea().Activate();
-            });
+            }));
         }
     }
 }
