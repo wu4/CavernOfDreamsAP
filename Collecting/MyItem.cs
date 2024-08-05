@@ -19,6 +19,7 @@ namespace CoDArchipelago.Collecting
 
         static Enum GetFlagCollectibleType(string flag)
         {
+            if (flag == "Nothing") return APCollectibleType.Nothing;
             if (Data.gratitudeItems.ContainsKey(flag))         return Collectible.CollectibleType.GRATITUDE;
             if (Data.pickupItems.ContainsKey(flag))            return Collectible.CollectibleType.ITEM;
             if (Data.abilityItems.ContainsKey(flag) ||
