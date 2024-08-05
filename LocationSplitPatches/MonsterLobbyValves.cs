@@ -16,7 +16,13 @@ namespace CoDArchipelago.LocationSplitPatches
         static void PatchValve(Transform valve)
         {
             var tsc = valve.GetComponent<TwoStateComponent>();
-            tsc.flag = $"LOCATION_{tsc.flag}";
+            string valveFlag = $"LOCATION_{tsc.flag}";
+            tsc.flag = valveFlag;
+            var valveRotate = valve.GetComponent<Rotate>();
+
+            Collecting.Location.RegisterTrigger(valveFlag, () => {
+                valveRotate.enabled = true;
+            });
         }
 
         ///<summary>
