@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine;
 using System.Linq;
 using UnityEngine.UI;
+using System;
 
 namespace CoDArchipelago.WhackableLabels
 {
@@ -30,6 +31,7 @@ namespace CoDArchipelago.WhackableLabels
             return ret;
         }
 
+        [LoadOrder(Int32.MaxValue)]
         public OnLoad() {
             var sampleButton = GameScene.FindInScene("Rendering", "Canvas/PauseMenu/PauseMenuPage1/Totals Button");
             var tmp = sampleButton.Find("ButtonText").GetComponent<TextMeshProUGUI>();
