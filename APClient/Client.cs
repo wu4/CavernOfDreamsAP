@@ -235,7 +235,7 @@ namespace CoDArchipelago.APClient
                 if (itemInfo.Player.Slot == slot) {
                     var itemName = itemInfo.ItemName;
 
-                    if (!Data.carryableItems.ContainsValue(itemName)) {
+                    if (!(Data.carryableItems.ContainsValue(itemName) || itemName == "Nothing")) {
                         itemName = Data.allItemsByName[itemName];
                     }
 
