@@ -8,8 +8,6 @@ namespace CoDArchipelago.VisualPatches
 
         public override void CollectJingle()
         {
-            StockSFX.Instance.jingleCollectLarge.Play();
-            GlobalHub.Instance.player.findSFX.Play();
         }
 
         public Nothing()
@@ -17,6 +15,7 @@ namespace CoDArchipelago.VisualPatches
             staticReplacement = new("Nothing");
             var collectible = staticReplacement.AddComponent<Collectible>();
             collectible.type = (Collectible.CollectibleType)APCollectibleType.Nothing;
+            var twostate = staticReplacement.AddComponent<TwoStateExists>();
         }
     }
 }

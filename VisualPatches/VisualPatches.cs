@@ -83,7 +83,10 @@ namespace CoDArchipelago.VisualPatches
                 ) {
                     return rep;
                 }
-                return replacementObjectsByType[item.type];
+                if (!replacementObjectsByType.TryGetValue(item.type, out var ret)) {
+                    Debug.LogError("no such item type {item.type}");
+                }
+                return ret;
             }
 
             public static GameObject ReplaceObject(GameObject obj, Collecting.Item item)
