@@ -62,13 +62,141 @@ namespace CoDArchipelago.MiscPatches
             {
                 startLocations = new() {
                     {"StartLocation(Sun Cavern)", new(
-                        "CAVE", "Sun Cavern (Main)", "Sage",
+                        "CAVE", "Sun Cavern (Main)",
+                        "Sage",
                         new(0f, -1.5f, 0f), Quaternion.Euler(270f, 90f, 0f)
                     )},
+                    {"StartLocation(Moon Cavern)", new(
+                        "CAVE", "Moon Cavern",
+                        "Moon Cavern",
+                        new(-4.23f, -2f, -0.375f), Quaternion.Euler(270f, 320f, 0f)
+                    )},
+
+                    {"StartLocation(Lostleaf Lobby)", new(
+                        "CAVE", "Lake Lobby",
+                        "Lostleaf Lobby",
+                        new(3.8f, -0.5f, 8.2f), Quaternion.Euler(270f, 215f, 0f)
+                    )},
+                    {"StartLocation(Armada Lobby)", new(
+                        "CAVE", "Monster Lobby",
+                        "Armada Lobby",
+                        new(2.145f, -1.04f, 3.0429f), Quaternion.Euler(270f, 220f, 0f)
+                    )},
+                    {"StartLocation(Prismic Lobby)", new(
+                        "CAVE", "Palace Lobby",
+                        "Prismic Lobby",
+                        new(1.1098f, -0.04f, 4.0945f), Quaternion.Euler(270f, 230f, 0f)
+                    )},
+                    {"StartLocation(Gallery Lobby)", new(
+                        "CAVE", "Gallery Lobby",
+                        "Gallery Lobby",
+                        new(35.8975f, 9.96f, 2.4454f), Quaternion.Euler(270f, 270f, 0f)
+                    )},
+
+                    {"StartLocation(Lostleaf Lake)", new(
+                        "LAKE", "Lake (Main)",
+                        "Lostleaf Lake",
+                        new(7.5977f, -0.915f, -10.6188f), Quaternion.Euler(270f, 140f, 0f)
+                    )},
+                    {"StartLocation(Lostleaf Church)", new(
+                        "LAKE", "Church",
+                        "Church",
+                        new(21.9583f, -0.04f, -0.0301f), Quaternion.Euler(270f, 270f, 0f)
+                    )},
+                    {"StartLocation(Lostleaf Treehouse)", new(
+                        "LAKE", "Bedroom",
+                        "Treehouse",
+                        new(-0.0658f, 0.0851f, -0.0489f), Quaternion.Euler(270f, 0f, 0f)
+                    )},
+                    {"StartLocation(Lostleaf Crypt)", new(
+                        "LAKE", "Crypt",
+                        "Crypt",
+                        new(10.4072f, 0.585f, 0.1865f), Quaternion.Euler(270f, 90f, 0f)
+                    )},
+
+                    {"StartLocation(Armada Outside)", new(
+                        "MONSTER", "Sky (Main)",
+                        "Airborne Armada",
+                        new(31.7403f, -4.04f, 45.6413f), Quaternion.Euler(270f, 220f, 0f)
+                    )},
+                    {"StartLocation(Armada Inside)", new(
+                        "MONSTER", "Monster",
+                        "Kerrington",
+                        new(0.023f, 0.96f, 51.1915f), Quaternion.Euler(270f, 180f, 0f)
+                    )},
+                    {"StartLocation(Armada Earth Drone)", new(
+                        "MONSTER", "DroneEarth",
+                        "Earth Drone",
+                        new(1.9985f, 2.9414f, -11.0252f), Quaternion.Euler(270f, 0f, 0f)
+                    )},
+                    {"StartLocation(Armada Fire Drone)", new(
+                        "MONSTER", "DroneFire",
+                        "Fire Drone",
+                        new(9.0833f, -0.04f, 2.4716f), Quaternion.Euler(270f, 240f, 0f)
+                    )},
+                    {"StartLocation(Armada Water Drone)", new(
+                        "MONSTER", "DroneWater",
+                        "Water Drone",
+                        new(17.2807f, -0.04f, 0.0607f), Quaternion.Euler(270f, 270f, 0f)
+                    )},
+
+                    {"StartLocation(Prismic Valley)", new(
+                        "PALACE", "Valley (Main)",
+                        "Valley",
+                        new(-0.0203f, 2.46f, -11.7598f), Quaternion.Euler(270f, 180f, 0f)
+                    )},
+                    {"StartLocation(Prismic Palace)", new(
+                        "PALACE", "Palace",
+                        "Prismic Palace",
+                        new(-0.0504f, -0.04f, -5.4154f), Quaternion.Euler(270f, 180f, 0f)
+                    )},
+                    {"StartLocation(Heavens Gate)", new(
+                        "PALACE", "Sanctum",
+                        "Heaven's Gate",
+                        new(-11.1413f, -1.04f, -2.1963f), Quaternion.Euler(270f, 80f, 0f)
+                    )},
+                    {"StartLocation(Observatory)", new(
+                        "PALACE", "Observatory",
+                        "Observatory",
+                        new(0.358f, 0.11f, 0.1266f), Quaternion.Euler(270f, 110f, 0f)
+                    )},
+
+                    {"StartLocation(Gallery Foyer)", new(
+                        "GALLERY", "Foyer (Main)",
+                        "Foyer",
+                        new(-16.4714f, 5.96f, -0.1199f), Quaternion.Euler(270f, 90f, 0f)
+                    )},
                     {"StartLocation(Gallery Earth)", new(
-                        "GALLERY", "Earth Lobby", "Rattles",
-                        new(0.8906f, -0.04f, -3.8734f), Quaternion.Euler(214f, 90f, 0f)
-                    )}
+                        "GALLERY", "Earth Lobby",
+                        "Rattles",
+                        new(0.8906f, -0.04f, -3.8734f), Quaternion.Euler(270f, 300f, 0f)
+                    )},
+                    {"StartLocation(Gallery Fire)", new(
+                        "GALLERY", "Fire Lobby",
+                        "Gallery Fire Lobby",
+                        new(-3.3196f, -0.04f, -0.0787f), Quaternion.Euler(270f, 270f, 0f)
+                    )},
+                    {"StartLocation(Gallery Water)", new(
+                        "GALLERY", "Water Lobby",
+                        "Gallery Sewers",
+                        new(-19.7272f, -2.04f, 0.1615f), Quaternion.Euler(270f, 130f, 0f)
+                    )},
+
+                    {"StartLocation(Wastes Of Eternity)", new(
+                        "UNDEAD", "Undead (Main)",
+                        "Wastes of Eternity",
+                        new(-16.1147f, 8.5998f, 12.3986f), Quaternion.Euler(270f, 186f, 0f)
+                    )},
+                    {"StartLocation(Coils Of Agony)", new(
+                        "CHALICE", "Chalice (Main)",
+                        "Coils of Agony",
+                        new(-0.5528f, -0.04f, 1.8209f), Quaternion.Euler(270f, 180f, 0f)
+                    )},
+                    {"StartLocation(Pits Of Despair)", new(
+                        "DROWN", "Drown (Main)",
+                        "Pits of Despair",
+                        new(0.1167f, 121.9601f, -7.1557f), Quaternion.Euler(270f, 180f, 0f)
+                    )},
                 };
             }
 
