@@ -106,7 +106,7 @@ namespace CoDArchipelago.Collecting
                 if (name == "PALACE_MELTED_ICE") {
                     ToggleIce(!b);
                 } else if (name == "FINALE_SUCCESS") {
-                    APClient.Client.Instance.SendVictory();
+                    APClient.Client.SendVictory();
                     return;
                 }
 

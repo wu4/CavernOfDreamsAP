@@ -60,6 +60,9 @@ namespace CoDArchipelago.LocationPatches
             return () => {
                 // coverage for loading into a seed with the flag already set
                 GlobalHub.Instance.save.SetFlag($"{hatchedFlag}_HATCHED", true);
+
+                if (GlobalHub.Instance.GetArea().name != "Sun Cavern (Main)") return;
+
                 hatched.StopBeingHungry();
             };
         }

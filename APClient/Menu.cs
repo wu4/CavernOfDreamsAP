@@ -407,8 +407,6 @@ namespace CoDArchipelago.APClient
                 }
             }
 
-
-
             class MO_START_AP : MenuOption
             {
                 string playerName;
@@ -442,12 +440,13 @@ namespace CoDArchipelago.APClient
                     var scene = SceneManager.GetActiveScene();
                     var dragonMainMenu = GetRootGameObject("DRAGON").GetComponent<DragonMainMenu>();
 
-                    APClient.Client.SetConnection(playerName, address, port);
+                    APClient.Client.Initialize(playerName, address, port);
 
                     MenuHandler.Instance.SetMenu(loadMenu, escape: false);
 
                     dragonMainMenu.WakeUp();
-                    loadMenu.StartCoroutine(GlobalHub.LoadGame(SaveHandler.SAVE_FILE_DEBUG));
+                    loadMenu.StartCoroutine(APClient.Client.TryLoadGame(dragonMainMenu, apMenu));
+                    // loadMenu.StartCoroutine(GlobalHub.LoadGame(SaveHandler.SAVE_FILE_DEBUG));
 
                     return true;
                 }

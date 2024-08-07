@@ -22,7 +22,7 @@ namespace CoDArchipelago.Collecting
         public virtual void Collect()
         {
             if (locationId.HasValue) {
-                APClient.Client.Instance.SendLocationCollected(locationId.Value);
+                APClient.Client.SendLocationCollected(locationId.Value);
             }
         }
 

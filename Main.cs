@@ -107,8 +107,6 @@ namespace CoDArchipelago
                 GlobalHub.Instance.save.Initialize();
 
                 GameSceneLoadMethods.Invoke();
-
-                MiscPatches.ChangeStartLocation.SetStartLocation("Cavern of Dreams - Sage");
             }
 
             static IEnumerable<CodeInstruction> Transpiler(

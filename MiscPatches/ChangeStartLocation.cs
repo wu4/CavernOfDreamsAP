@@ -54,14 +54,20 @@ namespace CoDArchipelago.MiscPatches
             }
         }
 
+        static string startLocation = "StartLocation(Sun Cavern)";
+
         class StartLocations : InstantiateOnGameSceneLoad
         {
             public StartLocations()
             {
                 startLocations = new() {
-                    {"Cavern of Dreams - Sage", new(
+                    {"StartLocation(Sun Cavern)", new(
                         "CAVE", "Sun Cavern (Main)", "Sage",
                         new(0f, -1.5f, 0f), Quaternion.Euler(270f, 90f, 0f)
+                    )},
+                    {"StartLocation(Gallery Earth)", new(
+                        "GALLERY", "Earth Lobby", "Rattles",
+                        new(0.8906f, -0.04f, -3.8734f), Quaternion.Euler(214f, 90f, 0f)
                     )}
                 };
             }
@@ -85,15 +91,11 @@ namespace CoDArchipelago.MiscPatches
 
         public static void SetStartLocation(string startLocationName)
         {
-            StartLocations.Get(startLocationName).SetAsStart();
+            startLocation = startLocationName;
         }
 
         public static void SetStartLocation(string worldName, string areaName, string warpName)
         {
-            // var a = CreateNewStart("CAVE", "Palace Lobby", "DestFromDepthsToPalaceLobby");
-            // var a = CreateNewStart("PALACE", "Valley (Main)", "DestFromPalaceLobbyToValley");
-            // var a = CreateNewStart("CAVE", "Sun Cavern (Main)", "DestFromMonsterLobbyToCave");
-
             Area area = GameScene.FindInScene(worldName, areaName).GetComponent<Area>();
             Destination dest = area.transform.Find(warpName).GetComponent<Destination>();
             GameObject startLocationObj = area.transform.Find(warpName + "/warp_destination").gameObject;
@@ -172,6 +174,8 @@ namespace CoDArchipelago.MiscPatches
         {
             static void Postfix()
             {
+                StartLocations.Get(startLocation).SetAsStart();
+
                 Transform t = ((GameObject)AccessTools.Field(typeof(GlobalHub), "positionStart").GetValue(GlobalHub.Instance)).transform;
 
                 var rotationToSet = t.rotation;

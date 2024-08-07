@@ -111,8 +111,6 @@ namespace CoDArchipelago.VisualPatches
 
             Collecting.Item item;
 
-            // Debug.LogWarning((obj.name, ts.flag));
-
             if (!Location.checks.TryGetValue(ts.flag, out item))
                 item = new MyItem(ts.flag.Substring(9), randomized: false);
 

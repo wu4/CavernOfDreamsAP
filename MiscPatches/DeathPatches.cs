@@ -74,7 +74,7 @@ namespace CoDArchipelago.MiscPatches
             static bool Prefix(Player __instance, Kill.KillType killType) {
                 if (warpIsDeath.Get(GlobalHub.Instance) || isDying) return false;
                 if (shouldSendDeathLink) {
-                    APClient.Client.Instance.SendDeathLink(killType);
+                    APClient.Client.SendDeathLink(killType);
                 }
 
                 isDying = true;

@@ -14,6 +14,7 @@ namespace CoDArchipelago.LocationPatches
             {"LAKE_CARRYABLE_APPLE_LAKE","LAKE/Lake (Main)/Objects/Fruit Tree/Replacer"},
             {"LAKE_CARRYABLE_APPLE_ENTRY","LAKE/Lake (Main)/Objects/Fruit Tree (1)/Replacer"},
             {"LAKE_CARRYABLE_APPLE_DEEPENTRY","LAKE/Lake (Main)/Objects/Fruit Tree (2)/Replacer"},
+            {"LAKE_CARRYABLE_APPLE_WINKYLEDGE","LAKE/Lake (Main)/Objects/Fruit Tree (3)/Replacer"},
             {"LAKE_CARRYABLE_APPLE_DEEPWOODS","LAKE/Lake (Main)/Objects/FruitTreeSidewaysReplacer"},
             {"LAKE_CARRYABLE_BOOTS_DEEPWOODS","LAKE/Lake (Main)/Objects/HoverBootsReplacer"},
             {"LAKE_CARRYABLE_APPLE_CRYPT","LAKE/Lake (Main)/Objects/Fruit Tree (5)/Replacer"},
@@ -55,6 +56,17 @@ namespace CoDArchipelago.LocationPatches
             }
         }
 
+        class CarryableCollectible : Collectible
+        {
+            public override void Collect()
+            {
+                var flag = GetComponent<TwoState>().flag;
+                if (!GlobalHub.Instance.save.GetFlag(flag).on)
+                    GlobalHub.Instance.save.SetFlag(flag, true);
+                Component.Destroy(GetComponent<SphereCollider>());
+            }
+        }
+
         [LoadOrder(Int32.MinValue + 1)]
         public Carryables()
         {
@@ -65,8 +77,14 @@ namespace CoDArchipelago.LocationPatches
                     MoveMedicinePipeOut(carryable);
                 }
 
-                var col = carryable.gameObject.AddComponent<Collectible>();
-                col.type = (Collectible.CollectibleType)APCollectibleType.Carryable;
+                var collectible = carryable.gameObject.AddComponent<CarryableCollectible>();
+                collectible.type = (Collectible.CollectibleType)APCollectibleType.Carryable;
+
+                SphereCollider collider = carryable.gameObject.AddComponent<SphereCollider>();
+                collider.radius = 0.5f;
+                collider.center = new Vector3(0f, 0.5f, 0f);
+                collider.isTrigger = true;
+                collider.tag = "NotPlayer";
 
                 var ts = carryable.gameObject.GetComponent<TwoState>();
                 ts.flag = carryableFlag;

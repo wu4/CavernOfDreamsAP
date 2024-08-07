@@ -77,6 +77,7 @@ namespace CoDArchipelago.LocationSplitPatches
                 modelHolder.GetComponent<Activation>().Activate();
             }
 
+            [LoadOrder(-1)]
             public PatchTeleports()
             {
                 var fellas = GameScene.FindInScene("CAVE", "Sun Cavern (Main)/Fellas");

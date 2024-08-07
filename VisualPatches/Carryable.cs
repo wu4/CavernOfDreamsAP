@@ -22,27 +22,22 @@ namespace CoDArchipelago.VisualPatches
                 carryable = val;
             }
 
-            GameObject newObject = UnityEngine.Object.Instantiate(carryables[carryable], new Transform());
-
-            newObject.name = toReplace.name;
-            newObject.transform.parent   = toReplace.transform.parent;
-            newObject.transform.position = toReplace.transform.position;
-            newObject.transform.rotation = toReplace.transform.rotation;
-
-            GameObject.Destroy(toReplace);
-
-            return newObject;
+            return ReplaceWith(toReplace, carryables[carryable]);
         }
 
         public override void CollectJingle()
         {
-            throw new NotImplementedException();
+            GlobalHub.Instance.player.curiousSFX.Play();
         }
 
         static GameObject CopyCarryable(string fullPath)
         {
             var toCopy = GameScene.FindInSceneFullPath(fullPath).gameObject;
             var obj = GameObject.Instantiate(toCopy, Container.transform);
+
+            // refer to LocationPatches/Carryables.cs for modifications
+            // the separation is necessary here so that they can be treated as
+            // Collectibles by VisualPatches
 
             return obj;
         }

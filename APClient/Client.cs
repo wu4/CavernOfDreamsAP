@@ -1,32 +1,193 @@
 using System;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using UnityEngine;
 using Archipelago.MultiClient.Net;
+using Archipelago.MultiClient.Net.Models;
+using Archipelago.MultiClient.Net.Helpers;
 using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.MessageLog.Messages;
 using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
+using Newtonsoft.Json.Linq;
 
 namespace CoDArchipelago.APClient
 {
-    class Client : InstantiateOnGameSceneLoad
+    static class Client
     {
-        public static Client Instance;
-        ConcurrentQueue<(string, Action)> mainThreadQueue;
-        MainThreadExecutor executor;
+        static ConcurrentQueue<(string, Action)> mainThreadQueue;
+        static MainThreadExecutor executor;
 
-        // Timer jingleCooldown;
+        static string playerName;
+        static string address;
+        static int port;
+
+        static ArchipelagoSession session;
+        static DeathLinkService deathLinkService;
+        static int slot;
+
+        // =====
+        // initialization steps
+        // =====
+        public static void Initialize(string _playerName, string _address, int _port)
+        {
+            playerName = _playerName;
+            address = _address;
+            port = _port;
+            beforeConnect = true;
+        }
+
+        static bool tryConnectSuccess = false;
+
+        public static IEnumerator TryLoadGame(DragonMainMenu dragonMainMenu, MenuScreen returnMenu)
+        {
+            var connectTask = TryConnect();
+            while (!connectTask.IsCompleted) {
+                yield return null;
+            }
+            if (tryConnectSuccess) {
+                dragonMainMenu.StartCoroutine(GlobalHub.LoadGame(SaveHandler.SAVE_FILE_DEBUG));
+            } else {
+                dragonMainMenu.GetComponentInChildren<Animator>().Play("Sleep");
+                dragonMainMenu.meshRenderer.materials[dragonMainMenu.indexMatEye].mainTexture = dragonMainMenu.texEyesClosed;
+                MenuHandler.Instance.SetMenu(returnMenu, escape: false);
+            }
+        }
+
+        static async Task TryConnect()
+        {
+            mainThreadQueue = new();
+            session = ArchipelagoSessionFactory.CreateSession(address, port);
+
+            try {
+                var connectResult = await session.ConnectAsync();
+            } catch (Exception e) {
+                session = null;
+                Debug.LogError($"Failed to connect to {address}:{port} - {e.Message}");
+                tryConnectSuccess = false;
+                return;
+            }
+
+            var loginResult = await session.LoginAsync(
+                game: "Cavern of Dreams",
+                name: playerName,
+                itemsHandlingFlags: ItemsHandlingFlags.AllItems,
+                version: new("0.5.0"),
+                tags: new string[]{"DeathLink"},
+                requestSlotData: true
+            );
+
+            if (!loginResult.Successful) {
+                session = null;
+                LoginFailure failure = (LoginFailure)loginResult;
+                string errorMessage = $"Failed to connect to {address}:{port}";
+                foreach (string error in failure.Errors)
+                {
+                    errorMessage += $"\n    {error}";
+                }
+                foreach (ConnectionRefusedError error in failure.ErrorCodes)
+                {
+                    errorMessage += $"\n    {error}";
+                }
+                Debug.LogError(errorMessage);
+                tryConnectSuccess = false;
+                return;
+            }
+
+            var loginSuccess = (LoginSuccessful)loginResult;
+            slot = loginSuccess.Slot;
+
+            ProcessSlotData(loginSuccess.SlotData);
+
+            session.MessageLog.OnMessageReceived += OnMessageReceived;
+
+            deathLinkService = session.CreateDeathLinkService();
+            deathLinkService.EnableDeathLink();
+
+            deathLinkService.OnDeathLinkReceived += OnDeathLinkReceived;
+
+            tryConnectSuccess = true;
+        }
+
+        static void ProcessSlotData(Dictionary<string, object> slotData)
+        {
+            string startLocation = (string)slotData["startLocation"];
+            MiscPatches.ChangeStartLocation.SetStartLocation(startLocation);
+
+            var entranceMap = (List<List<string>>)((JArray)slotData["entranceMap"]).ToObject(typeof(List<List<string>>));
+            if (entranceMap.Count != 0) {
+                MiscPatches.EntranceRando.SetEntranceMap(entranceMap);
+            }
+
+            bool splitGratitudeAndTeleports = (bool)slotData["splitGratitude"];
+            if (!splitGratitudeAndTeleports) {
+                LocationSplitPatches.GratitudeTeleports.LinkGratitudeWithTeleports.RegisterLinks();
+            }
+
+            bool dropCarryables = (bool)slotData["dropCarryables"];
+            MiscPatches.DropCarryablesOnWarp.shouldDropCarryables = dropCarryables;
+
+            var pityItems = (List<string>)((JArray)slotData["pityItems"]).ToObject(typeof(List<string>));
+            if (pityItems.Count > 0) {
+                string pityItemsStr = string.Join(", ", pityItems.Select(item => $"<color=#ee9999>{item}</color>"));
+                mainThreadQueue.Enqueue(("Pity Items", () => {
+
+                    Messaging.TextLogManager.AddLine($"<color=#aaaaaa>The following items have been included in this seed in order to minimize the odds of BK:</color>");
+                    Messaging.TextLogManager.AddLine(pityItemsStr);
+                }));
+            }
+        }
+
+        class StartGame : InstantiateOnGameSceneLoad
+        {
+            public StartGame()
+            {
+                GameObject manager = new GameObject("AP Connection Manager");
+                executor = manager.AddComponent<MainThreadExecutor>();
+                var task = InitializeLocations();
+                beforeConnect = false;
+            }
+        }
+
+        //=====
+        //public methods
+        //=====
+
+        public static void SendLocationCollected(long locationId)
+        {
+            session.Locations.CompleteLocationChecksAsync(new[]{locationId});
+        }
+
+        public static void SendMessage(string message)
+        {
+            session.Say(message);
+        }
+
+        public static void SendDeathLink(Kill.KillType killType)
+        {
+            DeathLink deathLink = new(playerName);
+            deathLinkService.SendDeathLink(deathLink);
+        }
+
+        public static void SendVictory()
+        {
+            session.SetGoalAchieved();
+        }
+
+        //=====
+        //misc
+        //=====
 
         class MainThreadExecutor : MonoBehaviour
         {
+            bool inFirstLoop = true;
+
             void Update()
             {
-                // Instance.jingleCooldown.Update();
-
-                while (Instance.mainThreadQueue.TryDequeue(out var nameAndAction)) {
+                while (mainThreadQueue.TryDequeue(out var nameAndAction)) {
                     (var name, var action) = nameAndAction;
                     try {
                         action();
@@ -35,47 +196,35 @@ namespace CoDArchipelago.APClient
                         Debug.LogError(e);
                     }
                 }
+
+                ItemInfo item;
+                while ((item = session.Items.DequeueItem()) != null) {
+                    var itemReceivedName = item.ItemName;
+                    if (Data.carryableItems.ContainsValue(itemReceivedName)){
+                        continue;
+                    }
+
+                    var itemFlag = Data.allItemsByName[itemReceivedName];
+
+                    var isReceivedBeforeConnect = inFirstLoop;
+                    Save save = GlobalHub.Instance.save;
+
+                    bool locallyCollected = save.GetFlag(itemFlag).on;
+                    if (locallyCollected) return;
+
+                    save.SetFlag(itemFlag, true);
+
+                    var collectingItem = new Collecting.MyItem(itemFlag, silent: isReceivedBeforeConnect);
+                    collectingItem.Collect();
+
+                    bool isCheatedOrStartingInventory = isReceivedBeforeConnect || item.Player.Slot == 0;
+                    if (isCheatedOrStartingInventory) return;
+
+                    VisualPatches.VisualPatches.CollectJingle(collectingItem);
+                }
+
+                inFirstLoop = false;
             }
-        }
-
-        [HarmonyPatch(typeof(MO_QUIT_GAME), nameof(MO_QUIT_GAME.OnSelect))]
-        static class OnQuit
-        {
-            static void Postfix(MO_QUIT_GAME __instance)
-            {
-                Instance.session = null;
-                Instance = null;
-            }
-        }
-
-        static string playerName;
-        static string address;
-        static int port;
-
-        public static void SetConnection(string _playerName, string _address, int _port)
-        {
-            playerName = _playerName;
-            address = _address;
-            port = _port;
-        }
-
-        ArchipelagoSession session;
-        DeathLinkService deathLinkService;
-        int slot;
-
-        [LoadOrder(Int32.MaxValue)]
-        public Client()
-        {
-            Instance = this;
-            // jingleCooldown = new(60);
-            // jingleCooldown.Reset();
-            mainThreadQueue = new();
-            session = ArchipelagoSessionFactory.CreateSession(address, port);
-            GameObject manager = new GameObject("AP Connection Manager");
-            executor = manager.AddComponent<MainThreadExecutor>();
-            session.MessageLog.OnMessageReceived += OnMessageReceived;
-
-            Initialize();
         }
 
         static string MessageColorAsHex(Archipelago.MultiClient.Net.Models.Color messageColor)
@@ -83,7 +232,26 @@ namespace CoDArchipelago.APClient
             return "#" + BitConverter.ToString(new[] {messageColor.R, messageColor.G, messageColor.B}).Replace("-", "");
         }
 
-        void OnMessageReceived(LogMessage message)
+        //=====
+        //listeners & callbacks
+        //=====
+
+        [HarmonyPatch(typeof(MO_QUIT_GAME), nameof(MO_QUIT_GAME.OnSelect))]
+        static class OnQuit
+        {
+            static void Postfix(MO_QUIT_GAME __instance)
+            {
+                session.MessageLog.OnMessageReceived -= OnMessageReceived;
+                deathLinkService.OnDeathLinkReceived -= OnDeathLinkReceived;
+                session.Socket.DisconnectAsync();
+                mainThreadQueue = null;
+                deathLinkService = null;
+                GameObject.DestroyImmediate(executor.gameObject);
+                executor = null;
+            }
+        }
+
+        static void OnMessageReceived(LogMessage message)
         {
             string messageString = "";
 
@@ -98,79 +266,7 @@ namespace CoDArchipelago.APClient
             }));
         }
 
-        public void SendLocationCollected(long locationId)
-        {
-            session.Locations.CompleteLocationChecksAsync(new[]{locationId});
-        }
-
-        public void SendMessage(string message)
-        {
-            session.Say(message);
-        }
-
-        async void Initialize()
-        {
-            var connectResult = await session.ConnectAsync();
-
-            InitializeItems();
-
-            var loginResult = await session.LoginAsync(
-                game: "Cavern of Dreams",
-                name: playerName,
-                itemsHandlingFlags: ItemsHandlingFlags.AllItems,
-                version: new("0.5.0"),
-                tags: new string[]{"DeathLink"},
-                requestSlotData: true
-            );
-
-            if (!loginResult.Successful) {
-                LoginFailure failure = (LoginFailure)loginResult;
-                string errorMessage = $"Failed to connect:";
-                foreach (string error in failure.Errors)
-                {
-                    errorMessage += $"\n    {error}";
-                }
-                foreach (ConnectionRefusedError error in failure.ErrorCodes)
-                {
-                    errorMessage += $"\n    {error}";
-                }
-                Debug.LogError(errorMessage);
-                return;
-            }
-
-            var loginSuccess = (LoginSuccessful)loginResult;
-            slot = loginSuccess.Slot;
-
-            bool splitGratitudeAndTeleports = (bool)loginSuccess.SlotData["splitGratitude"];
-
-            Debug.Log($"splitGratitudeAndTeleports = {splitGratitudeAndTeleports}");
-
-            if (!splitGratitudeAndTeleports) {
-                LocationSplitPatches.GratitudeTeleports.LinkGratitudeWithTeleports.RegisterLinks();
-            }
-
-            // mainThreadQueue.Append(jingleCooldown.Reset);
-
-            // foreach (ItemInfo item in session.Items.AllItemsReceived)
-            // {
-            //     new Collecting.MyItem(Data.allItemsByName[item.ItemName]).Collect();
-            // }
-
-            deathLinkService = session.CreateDeathLinkService();
-            deathLinkService.EnableDeathLink();
-
-            deathLinkService.OnDeathLinkReceived += OnDeathLinkReceived;
-
-            await InitializeLocations();
-        }
-
-        public void SendDeathLink(Kill.KillType killType)
-        {
-            DeathLink deathLink = new(playerName);
-            deathLinkService.SendDeathLink(deathLink);
-        }
-
-        void OnDeathLinkReceived(DeathLink deathLink)
+        static void OnDeathLinkReceived(DeathLink deathLink)
         {
             mainThreadQueue.Enqueue(("OnDeathLinkReceived", () => {
                 MiscPatches.DeathPatches.shouldSendDeathLink = false;
@@ -179,40 +275,9 @@ namespace CoDArchipelago.APClient
             }));
         }
 
-        void InitializeItems()
-        {
-            session.Items.ItemReceived += (receivedItemsHelper) => {
-                var peekedItem = receivedItemsHelper.PeekItem();
-                var itemReceivedName = peekedItem.ItemName;
-                var itemFlag = Data.allItemsByName[itemReceivedName];
+        static bool beforeConnect;
 
-                mainThreadQueue.Enqueue(($"Initializing item for flag {itemFlag}", () => {
-                    Save save = GlobalHub.Instance.save;
-
-                    bool locallyCollected = save.GetFlag(itemFlag).on;
-                    if (locallyCollected) return;
-
-                    save.SetFlag(itemFlag, true);
-
-                    var collectingItem = new Collecting.MyItem(itemFlag);
-                    collectingItem.Collect();
-
-                    bool isCheatedOrStartingInventory = peekedItem.Player.Slot == 0;
-                    if (isCheatedOrStartingInventory) return;
-
-                    VisualPatches.VisualPatches.CollectJingle(collectingItem);
-                }));
-
-                receivedItemsHelper.DequeueItem();
-            };
-        }
-
-        public void SendVictory()
-        {
-            session.SetGoalAchieved();
-        }
-
-        async Task InitializeLocations()
+        static async Task InitializeLocations()
         {
             var ids = session.Locations.AllLocations.ToArray();
 
@@ -259,10 +324,15 @@ namespace CoDArchipelago.APClient
                         )
                     );
                 }
-                //if (itemInfo.Player.Slot != slot) continue;
             }
 
-            List<string> checkedLocationFlags = session.Locations.AllLocationsChecked.Select(location => Data.allLocationsByName[session.Locations.GetLocationNameFromId(location)]).ToList();
+            List<string> checkedLocationFlags =
+                session.Locations.AllLocationsChecked
+                .Select(
+                    location =>
+                        Data.allLocationsByName[session.Locations.GetLocationNameFromId(location)]
+                )
+                .ToList();
 
             mainThreadQueue.Enqueue(("PatchAllVisuals", () => {
                 VisualPatches.VisualPatches.PatchAllVisuals();
