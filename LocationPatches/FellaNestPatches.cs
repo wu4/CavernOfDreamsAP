@@ -47,33 +47,36 @@ namespace CoDArchipelago.LocationPatches
 
                 GameObject hatchable = fellaNest.Find("FellaHatchable").gameObject;
 
-                Collecting.MyItem.RegisterTrigger(nest.hatchedFlag, ShowFellaFactory(hatchable));
-                Collecting.Location.RegisterTrigger(nest.gratitudeFlag, FeedFellaFactory(nest.hatchedFlag, hatched));
+                Collecting.MyItem.RegisterTrigger(nest.hatchedFlag, ShowFellaFactory(hatchable, nest.hatchedFlag));
+                Collecting.Location.RegisterTrigger(nest.gratitudeFlag, FeedFellaFactory(hatched, nest.hatchedFlag));
 
                 string noMoreNotesDialogPath = hatchedObj.transform.Find("Cutscenes/NoMoreNotesCutscene/NoMoreNotesDialog").GetPath();
                 MiscPatches.DialogPatches.RegisterDynamicDialogPatch(noMoreNotesDialogPath, NotEnoughNotesDialogFactory(nest.requirement));
             }
         }
 
-        static Action FeedFellaFactory(string hatchedFlag, FellaHatched hatched)
+        static Action FeedFellaFactory(FellaHatched hatched, string hatchedFlag)
         {
             return () => {
                 // coverage for loading into a seed with the flag already set
                 GlobalHub.Instance.save.SetFlag($"{hatchedFlag}_HATCHED", true);
+                GlobalHub.Instance.save.SetFlag(hatchedFlag, true);
 
-                if (GlobalHub.Instance.GetArea().name != "Sun Cavern (Main)") return;
-
-                hatched.StopBeingHungry();
+                try {
+                    hatched.StopBeingHungry();
+                } catch (Exception e) {
+                    Debug.LogError($"error while stopping FellaHatched from being hungry: {e.Message}");
+                }
             };
         }
 
-        static Action<bool> ShowFellaFactory(GameObject hatchable)
+        static Action<bool> ShowFellaFactory(GameObject hatchable, string hatchedFlag)
         {
             return randomized => {
-                if (!randomized) return;
-
-                if (GlobalHub.Instance.GetArea().name != "Sun Cavern (Main)") return;
-
+                if (GlobalHub.Instance.save.GetFlag($"{hatchedFlag}_HATCHED").on) {
+                    hatchable.SetActive(false);
+                    return;
+                };
                 hatchable.SetActive(true);
             };
         }
