@@ -186,33 +186,31 @@ namespace CoDArchipelago.APClient
         {
             bool inFirstLoop = true;
 
-            void CollectItem(ItemInfo item)
+            void CollectItem(ItemInfo item, string itemFlag, bool playJingle)
             {
                 Save save = GlobalHub.Instance.save;
-                var itemFlag = Data.allItemsByName[item.ItemName];
-                bool locallyCollected = save.GetFlag(itemFlag).on;
-                if (locallyCollected) return;
 
                 save.SetFlag(itemFlag, true);
 
                 var collectingItem = new Collecting.MyItem(itemFlag, silent: inFirstLoop);
                 collectingItem.Collect();
 
-                bool isCheatedOrStartingInventory = inFirstLoop || item.Player.Slot == 0;
-                if (isCheatedOrStartingInventory) return;
+                if (!playJingle) return;
 
                 VisualPatches.VisualPatches.CollectJingle(collectingItem);
             }
 
-            void CollectShroom()
+            void CollectShroom(bool playJingle)
             {
                 var shroom = new Collecting.MyItem(
                     "Shroom",
                     silent: inFirstLoop
                 );
                 shroom.Collect();
-                if (!inFirstLoop)
-                    VisualPatches.VisualPatches.CollectJingle(shroom);
+
+                if (!playJingle) return;
+
+                VisualPatches.VisualPatches.CollectJingle(shroom);
             }
 
             void OnItemReceive(ItemInfo item)
@@ -220,14 +218,22 @@ namespace CoDArchipelago.APClient
                 if (Data.carryableItems.ContainsValue(item.ItemName))
                     return;
 
+                bool shouldJingle = !(inFirstLoop || item.Player.Slot == 0);
+
                 if (item.ItemName == "Shroom") {
                     if (!inFirstLoop || (slot != item.Player.Slot))
                         return;
-                    CollectShroom();
+                    CollectShroom(shouldJingle);
                     return;
                 }
 
-                CollectItem(item);
+                Save save = GlobalHub.Instance.save;
+                var itemFlag = Data.allItemsByName[item.ItemName];
+
+                bool locallyCollected = save.GetFlag(itemFlag).on;
+                if (locallyCollected) return;
+
+                CollectItem(item, itemFlag, shouldJingle);
             }
 
             void Update()
