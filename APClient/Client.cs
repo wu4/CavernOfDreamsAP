@@ -186,6 +186,50 @@ namespace CoDArchipelago.APClient
         {
             bool inFirstLoop = true;
 
+            void CollectItem(ItemInfo item)
+            {
+                Save save = GlobalHub.Instance.save;
+                var itemFlag = Data.allItemsByName[item.ItemName];
+                bool locallyCollected = save.GetFlag(itemFlag).on;
+                if (locallyCollected) return;
+
+                save.SetFlag(itemFlag, true);
+
+                var collectingItem = new Collecting.MyItem(itemFlag, silent: inFirstLoop);
+                collectingItem.Collect();
+
+                bool isCheatedOrStartingInventory = inFirstLoop || item.Player.Slot == 0;
+                if (isCheatedOrStartingInventory) return;
+
+                VisualPatches.VisualPatches.CollectJingle(collectingItem);
+            }
+
+            void CollectShroom()
+            {
+                var shroom = new Collecting.MyItem(
+                    "Shroom",
+                    silent: inFirstLoop
+                );
+                shroom.Collect();
+                if (!inFirstLoop)
+                    VisualPatches.VisualPatches.CollectJingle(shroom);
+            }
+
+            void OnItemReceive(ItemInfo item)
+            {
+                if (Data.carryableItems.ContainsValue(item.ItemName))
+                    return;
+
+                if (item.ItemName == "Shroom") {
+                    if (!inFirstLoop || (slot != item.Player.Slot))
+                        return;
+                    CollectShroom();
+                    return;
+                }
+
+                CollectItem(item);
+            }
+
             void Update()
             {
                 while (mainThreadQueue.TryDequeue(out var nameAndAction)) {
@@ -200,40 +244,7 @@ namespace CoDArchipelago.APClient
 
                 ItemInfo item;
                 while ((item = session.Items.DequeueItem()) != null) {
-                    var itemReceivedName = item.ItemName;
-                    if (Data.carryableItems.ContainsValue(itemReceivedName)){
-                        continue;
-                    }
-
-                    var isReceivedBeforeConnect = inFirstLoop;
-                    Save save = GlobalHub.Instance.save;
-
-                    if (itemReceivedName == "Shroom") {
-                        if (slot != item.Player.Slot || isReceivedBeforeConnect) {
-                            var shroom = new Collecting.MyItem(
-                                "Shroom",
-                                silent: isReceivedBeforeConnect
-                            );
-                            shroom.Collect();
-                            if (!isReceivedBeforeConnect)
-                                VisualPatches.VisualPatches.CollectJingle(shroom);
-                        }
-                        return;
-                    }
-
-                    var itemFlag = Data.allItemsByName[itemReceivedName];
-                    bool locallyCollected = save.GetFlag(itemFlag).on;
-                    if (locallyCollected) return;
-
-                    save.SetFlag(itemFlag, true);
-
-                    var collectingItem = new Collecting.MyItem(itemFlag, silent: isReceivedBeforeConnect);
-                    collectingItem.Collect();
-
-                    bool isCheatedOrStartingInventory = isReceivedBeforeConnect || item.Player.Slot == 0;
-                    if (isCheatedOrStartingInventory) return;
-
-                    VisualPatches.VisualPatches.CollectJingle(collectingItem);
+                    OnItemReceive(item);
                 }
 
                 inFirstLoop = false;
