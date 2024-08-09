@@ -11,7 +11,7 @@ def categories_as_code(type: str, container: Iterable[tuple[str, Iterable[tuple[
     normal: list[str] = []
     all.append(start(f"all{type}"))
     for category, rows in container:
-        if type == "ItemsByName" and category == "carryable": continue
+        if type == "ItemsByName" and category in ["carryable", "shroom"]: continue
 
         normal.append(start(f"{category}{type}"))
         for a, b in rows:

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -14,13 +13,16 @@ namespace CoDArchipelago.VisualPatches
 
         readonly Dictionary<string, Sprite> shroomSprites;
         readonly GameObject shroom;
+        static readonly Random random = new();
 
         public override GameObject Replace(GameObject toReplace, Item item)
         {
-            string flagName = item.GetFlag();
+            // string flagName = item.GetFlag();
 
-            string worldName = GetWorldFromFlag(flagName, shroomWorldRegex)
-                ?? throw new Exception("failed to identify world for shroom " + flagName);
+            // string worldName = GetWorldFromFlag(flagName, shroomWorldRegex)
+            //     ?? throw new Exception("failed to identify world for shroom " + flagName);
+
+            string worldName = sampleShrooms.Keys.Skip(Random.Range(0, sampleShrooms.Keys.Count)).First();
 
             GameObject obj = ReplaceWith(toReplace, shroom);
             obj.GetComponentInChildren<SpriteRenderer>().sprite = shroomSprites[worldName];

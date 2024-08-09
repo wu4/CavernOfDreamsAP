@@ -134,11 +134,12 @@ namespace CoDArchipelago.APClient
             if (pityItems.Count > 0) {
                 string pityItemsStr = string.Join(", ", pityItems.Select(item => $"<color=#ee9999>{item}</color>"));
                 mainThreadQueue.Enqueue(("Pity Items", () => {
-
-                    Messaging.TextLogManager.AddLine($"<color=#aaaaaa>The following items have been included in this seed in order to minimize the odds of BK:</color>");
+                    Messaging.TextLogManager.AddLine($"<color=#aaaaaa>The following items have been given to Fynn in order to minimize the odds of royal fast food consumption (or otherwise make the seed playable):</color>");
                     Messaging.TextLogManager.AddLine(pityItemsStr);
                 }));
             }
+
+            MiscPatches.NoJesterBootsCarry.allowFun = (bool)slotData["allowFun"];
         }
 
         class StartGame : InstantiateOnGameSceneLoad
@@ -204,11 +205,23 @@ namespace CoDArchipelago.APClient
                         continue;
                     }
 
-                    var itemFlag = Data.allItemsByName[itemReceivedName];
-
                     var isReceivedBeforeConnect = inFirstLoop;
                     Save save = GlobalHub.Instance.save;
 
+                    if (itemReceivedName == "Shroom") {
+                        if (slot != item.Player.Slot || isReceivedBeforeConnect) {
+                            var shroom = new Collecting.MyItem(
+                                "Shroom",
+                                silent: isReceivedBeforeConnect
+                            );
+                            shroom.Collect();
+                            if (!isReceivedBeforeConnect)
+                                VisualPatches.VisualPatches.CollectJingle(shroom);
+                        }
+                        return;
+                    }
+
+                    var itemFlag = Data.allItemsByName[itemReceivedName];
                     bool locallyCollected = save.GetFlag(itemFlag).on;
                     if (locallyCollected) return;
 
@@ -300,7 +313,7 @@ namespace CoDArchipelago.APClient
                 if (itemInfo.Player.Slot == slot) {
                     var itemName = itemInfo.ItemName;
 
-                    if (!(Data.carryableItems.ContainsValue(itemName) || itemName == "Nothing")) {
+                    if (!(itemName == "Shroom" || Data.carryableItems.ContainsValue(itemName))) {
                         itemName = Data.allItemsByName[itemName];
                     }
 

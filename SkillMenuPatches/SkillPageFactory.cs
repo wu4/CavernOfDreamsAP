@@ -141,15 +141,21 @@ namespace CoDArchipelago.SkillMenuPatches
                 (string flagName, var data) = skillFlags.ElementAt(COL_HEIGHTS.Take(i % ROW_WIDTH).Sum() + (i / ROW_WIDTH));
                 GameObject flagObj = menuFlagFactory.Create(flagName, data.prettyName, newSkillPage.transform);
                 flagObj.transform.localPosition = new Vector3(){x = START_X + (STEP_X * (i % ROW_WIDTH)), y = START_Y - STEP_Y * Mathf.Floor(i / ROW_WIDTH), z = 0};
+                i++;
+            }
 
+            if (!isDebug) {
+                GameObject jbFlagObj = menuFlagFactory.Create("", "Jester Boots", newSkillPage.transform);
+                MO_JESTERBOOTS.Replace(jbFlagObj.GetComponent<MO_FLAG>());
+                jbFlagObj.transform.localPosition = new Vector3(){x = START_X + (STEP_X * (i % ROW_WIDTH)), y = START_Y - STEP_Y * Mathf.Floor(i / ROW_WIDTH), z = 0};
                 i++;
             }
 
             if (!isDebug) return newSkillPage.GetComponent<CursorPage>();
 
-            GameObject jbFlagObj = menuFlagFactory.Create("", "Jester Boots", newSkillPage.transform);
-            MO_JESTERBOOTS.Replace(jbFlagObj.GetComponent<MO_FLAG>());
-            jbFlagObj.transform.localPosition = new Vector3(){x = START_X + (STEP_X * (i % ROW_WIDTH)), y = START_Y - STEP_Y * Mathf.Floor(i / ROW_WIDTH), z = 0};
+            GameObject jbDebugFlagObj = menuFlagFactory.Create("", "Jester Boots", newSkillPage.transform);
+            MO_DEBUG_JESTERBOOTS.Replace(jbDebugFlagObj.GetComponent<MO_FLAG>());
+            jbDebugFlagObj.transform.localPosition = new Vector3(){x = START_X + (STEP_X * (i % ROW_WIDTH)), y = START_Y - STEP_Y * Mathf.Floor(i / ROW_WIDTH), z = 0};
             i++;
 
             foreach ((string name, GameObject obj) in VisualPatches.CarryablePatch.carryables) {

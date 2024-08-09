@@ -1,14 +1,18 @@
 using UnityEngine;
+using System;
+using TMPro;
 
 namespace CoDArchipelago.SkillMenuPatches
 {
     class MO_JESTERBOOTS : MenuOptionToggle
     {
-        Access.Field<Player, bool> wearingHoverBoots = new("wearingHoverBoots");
+        static readonly Color lockedColor = new(0.5f, 0.5f, 0.5f);
+
+        TextMeshProUGUI label;
+
         protected override void Toggle()
         {
-            Player player = GlobalHub.Instance.player;
-            wearingHoverBoots.Set(player, !wearingHoverBoots.Get(player));
+            throw new NotImplementedException();
         }
 
         protected override bool IsOn()
@@ -30,6 +34,46 @@ namespace CoDArchipelago.SkillMenuPatches
 
             return toggle;
         }
-    }
 
+        bool CanTakeOffHoverBoots() => GlobalHub.Instance.player.WearingHoverBoots();
+
+        void SetTogglableAppearance()
+        {
+            if (!CanTakeOffHoverBoots()) {
+                label.alpha = 0.1f;
+                BG.color = lockedColor;
+            } else {
+                label.alpha = 1f;
+            }
+        }
+
+        public override void Open()
+        {
+            label = transform.Find("Label").GetComponent<TextMeshProUGUI>();
+            base.Open();
+            SetTogglableAppearance();
+        }
+
+        bool LockableToggle()
+        {
+            if (!CanTakeOffHoverBoots()) return false;
+
+            Player player = GlobalHub.Instance.player;
+            player.EquipHoverBoots(false, true);
+
+            return true;
+        }
+
+        public override bool OnSelect()
+        {
+            bool ret = LockableToggle();
+            if (!ret) {
+                GlobalHub.Instance.player.whimperSFX.Play();
+            }
+
+            base.SetAppearance();
+            SetTogglableAppearance();
+            return ret;
+        }
+    }
 }

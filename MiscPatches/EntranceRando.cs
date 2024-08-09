@@ -9,7 +9,7 @@ namespace CoDArchipelago.MiscPatches
 {
     class EntranceRando : InstantiateOnGameSceneLoad
     {
-        static List<List<string>> entranceMap;
+        static List<List<string>> entranceMap = new();
         static readonly Dictionary<string, bool> camInFrontPaths = new() {};
 
         public static void SetEntranceMap(List<List<string>> entranceMap)
