@@ -42,7 +42,6 @@ namespace CoDArchipelago.LocationPatches
         static readonly string[] pipeParts = new string[] {
             "dispenser",
             "emitter",
-            "Shadow",
             "Particle System"
         };
 
