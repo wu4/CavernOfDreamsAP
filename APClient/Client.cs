@@ -26,6 +26,7 @@ namespace CoDArchipelago.APClient
         static string playerName;
         static string address;
         static int port;
+        static string password;
 
         static ArchipelagoSession session;
         static DeathLinkService deathLinkService;
@@ -34,11 +35,12 @@ namespace CoDArchipelago.APClient
         // =====
         // initialization steps
         // =====
-        public static void Initialize(string _playerName, string _address, int _port)
+        public static void Initialize(string _playerName, string _address, int _port, string _password = "")
         {
             playerName = _playerName;
             address = _address;
             port = _port;
+            password = _password;
             beforeConnect = true;
         }
 
@@ -79,7 +81,8 @@ namespace CoDArchipelago.APClient
                 itemsHandlingFlags: ItemsHandlingFlags.AllItems,
                 version: new("0.5.0"),
                 tags: new string[]{"DeathLink"},
-                requestSlotData: true
+                requestSlotData: true,
+                password: string.IsNullOrEmpty(password) ? null : password
             );
 
             if (!loginResult.Successful) {
