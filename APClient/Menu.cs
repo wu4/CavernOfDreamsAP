@@ -140,7 +140,7 @@ namespace CoDArchipelago.APClient
 
                 DestroyAllChildren(page.transform);
 
-                int y = 40;
+                int y = 90;
 
                 inputFields.Clear();
                 foreach (var fieldName in fields) {
@@ -148,6 +148,8 @@ namespace CoDArchipelago.APClient
                     inputField.transform.localPosition = new(0, y, 0);
                     if (fieldName == "Port")
                         inputField.characterValidation = InputField.CharacterValidation.Integer;
+                    if (fieldName == "Password")
+                        inputField.inputType = InputField.InputType.Password;
                     inputFields.Add(fieldName, inputField);
                     y -= 20;
                 }
@@ -190,7 +192,7 @@ namespace CoDArchipelago.APClient
                 }
             }
 
-            static string[] fields = new string[] {"Player Name", "Address", "Port"};
+            static string[] fields = new string[] {"Player Name", "Address", "Port", "Password"};
             Dictionary<string, TextLogInputField> inputFields = new();
 
             public CursorPage CreateCursorPage(Transform parent)
@@ -212,7 +214,8 @@ namespace CoDArchipelago.APClient
                     sessions.AddSession(
                         inputFields["Player Name"].text,
                         inputFields["Address"].text,
-                        int.Parse(inputFields["Port"].text)
+                        int.Parse(inputFields["Port"].text),
+                        inputFields["Password"].text
                     );
                     SaveSavedSessions();
                     return base.OnSelect();
@@ -276,11 +279,15 @@ namespace CoDArchipelago.APClient
                 [SerializeField]
                 public int port;
 
-                public APSession(string _playerName, string _address, int _port)
+                [SerializeField]
+                public string password;
+
+                public APSession(string _playerName, string _address, int _port, string _password = "")
                 {
                     playerName = _playerName;
                     address = _address;
                     port = _port;
+                    password = _password;
                 }
             }
 
@@ -291,9 +298,9 @@ namespace CoDArchipelago.APClient
                 sessions.RemoveAt(index);
             }
 
-            public void AddSession(string playerName, string address, int port = 38281)
+            public void AddSession(string playerName, string address, int port = 38281, string password = "")
             {
-                sessions.Add(new(playerName, address, port));
+                sessions.Add(new(playerName, address, port, password));
             }
         }
 
@@ -412,6 +419,7 @@ namespace CoDArchipelago.APClient
                 string playerName;
                 string address;
                 int port;
+                string password;
 
                 public static MO_START_AP Create(Transform parent, APSavedSessions.APSession session)
                 {
@@ -424,6 +432,7 @@ namespace CoDArchipelago.APClient
                     ap.playerName = session.playerName;
                     ap.address = session.address;
                     ap.port = session.port;
+                    ap.password = session.password;
                     ap.BG = obj.transform.Find("ButtonBG").GetComponent<Image>();
                     ap.BG.rectTransform.sizeDelta = new(300, 56);
                     ap.text = obj.transform.Find("ButtonText").GetComponent<TextMeshProUGUI>();
@@ -440,7 +449,7 @@ namespace CoDArchipelago.APClient
                     var scene = SceneManager.GetActiveScene();
                     var dragonMainMenu = GetRootGameObject("DRAGON").GetComponent<DragonMainMenu>();
 
-                    APClient.Client.Initialize(playerName, address, port);
+                    APClient.Client.Initialize(playerName, address, port, password);
 
                     MenuHandler.Instance.SetMenu(loadMenu, escape: false);
 
